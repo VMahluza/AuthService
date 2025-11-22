@@ -1,4 +1,4 @@
-﻿namespace AuthService.Domain
+﻿namespace AuthService.Application
 {
     public class Class1
     {
