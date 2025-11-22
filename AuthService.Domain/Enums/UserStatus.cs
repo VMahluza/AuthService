@@ -12,4 +12,3 @@ public enum UserStatus
     Locked,
     PendingVerification
 }
-

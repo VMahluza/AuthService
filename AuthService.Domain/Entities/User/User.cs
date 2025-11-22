@@ -16,9 +16,8 @@ public class User : BaseEntity
     public int FailedLoginAttempts { get; private set; }
 
     private User() { }
-    public User(string userName, EmailAddress email, PasswordHash passwordHash, UserStatus status, int failedLoginAttempts)
+    public User(Guid id, string userName, EmailAddress email, PasswordHash passwordHash, UserStatus status, int failedLoginAttempts) : base(id)
     {
-        Id = Guid.NewGuid();
         UserName = userName;
         Email = email;
         PasswordHash = passwordHash;
@@ -30,11 +29,7 @@ public class User : BaseEntity
     {
         var emailAddress = EmailAddress.Create(email);
         var passwordHash = PasswordHash.Create(hasher.Hash(rawPassword).ToString());
-
-        return new User(userName, emailAddress, passwordHash, UserStatus.PendingVerification, 0)
-        {
-            CreatedAt = DateTime.UtcNow,
-            LastUpdatedAt = DateTime.UtcNow
-        };
+        var newUserId = Guid.NewGuid();
+        return new User(newUserId, userName, emailAddress, passwordHash, UserStatus.PendingVerification, 0);
     }
 }
