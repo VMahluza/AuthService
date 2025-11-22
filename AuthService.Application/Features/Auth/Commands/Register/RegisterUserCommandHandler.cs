@@ -25,23 +25,23 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
             throw new InvalidOperationException($"Email {request.Email} is already in use.");
         }
 
-        var existingUserByUsername = _userRepository.GetByUsernameAsync(request.Username);
+        var existingUserByUsername = _userRepository.GetByUsernameAsync(request.UserName);
         if (existingUserByUsername is not null)
         {
-            throw new InvalidOperationException($"Username {request.Username} is already in use.");
+            throw new InvalidOperationException($"Username {request.UserName} is already in use.");
         }
 
         PasswordHash passwordHash = PasswordHash.Create(request.Password);
 
 
         EmailAddress emailAddress = EmailAddress.Create(request.Email);
-        User newUser = User.RegisterNew(request.Username, request.Email, request.Password, _passwordHasher);
+        User newUser = User.RegisterNew(request.UserName, request.Email, request.Password, _passwordHasher);
 
         await _userRepository.AddAsync(newUser);
 
         return new RegisterUserResult(
             UserId: newUser.Id,
-            Username: newUser.UserName,
+            UserName: newUser.UserName,
             Email: newUser.Email.Value
         );
     }
