@@ -8,12 +8,15 @@
 
   <ItemGroup>
     <Folder Include="Features\Auth\Commands\Login\" />
-    <Folder Include="Features\Auth\Commands\Register\" />
     <Folder Include="Features\Auth\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="13.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuthService.Domain\AuthService.Domain.csproj" />
   </ItemGroup>
 
 </Project>
