@@ -6,5 +6,5 @@ namespace AuthService.Domain.Interfaces;
 
 public interface IPasswordHasher
 {
-    string Hash(string password);
+    PasswordHash Hash(string password);
 }
