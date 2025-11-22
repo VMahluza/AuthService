@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -13,8 +14,5 @@ public static class DependencyInjection
         services.AddTransient(x =>
           new MySqlConnection(configuration.GetConnectionString("Default")));
         return services;
-
-
-
     }
 }
