@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Auth\Commands\Login\" />
+    <Folder Include="Features\Auth\Commands\Register\" />
+    <Folder Include="Features\Auth\Queries\" />
+  </ItemGroup>
+
 </Project>
