@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\AuthService.Application\AuthService.Application.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,6 +6,6 @@ namespace AuthService.Application.Features.Auth.Commands.Register;
 
 public record RegisterUserResult(
     Guid UserId,
-    string Username,
+    string UserName,
     string Email
     );
