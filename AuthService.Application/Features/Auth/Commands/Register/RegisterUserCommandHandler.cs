@@ -1,4 +1,5 @@
-﻿using AuthService.Domain.Interfaces;
+﻿using AuthService.Domain.Entities.User;
+using AuthService.Domain.Interfaces;
 using AuthService.Domain.Interfaces.Repositories;
 using MediatR;
 
@@ -15,15 +16,33 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         _passwordHasher = passwordHasher;
     }
 
-    public Task<RegisterUserResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<RegisterUserResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
 
-        // TODO: 1. Validation: Check if the email is already taken
-        // TODO: 2. Validation: Check if the username is already taken
-        // TODO: 3. Security: Hash the password (Infrastructure Responsibility)
-        // TODO: 4. Domain Logic: Create the User Aggregate (Domain Responsibility)
-        // TODO: 5. Persistence: Save the new user (Infrastructure Responsibility)
-        // TODO: 6. Output: Return the result DTO
-        throw new NotImplementedException();
+        Task<User> existingUserByEmail = _userRepository.GetByEmailAsync(request.Email);
+        if (existingUserByEmail is not null)
+        {
+            throw new InvalidOperationException($"Email {request.Email} is already in use.");
+        }
+
+        var existingUserByUsername = _userRepository.GetByUsernameAsync(request.Username);
+        if (existingUserByUsername is not null)
+        {
+            throw new InvalidOperationException($"Username {request.Username} is already in use.");
+        }
+
+        PasswordHash passwordHash = PasswordHash.Create(request.Password);
+
+
+        EmailAddress emailAddress = EmailAddress.Create(request.Email);
+        User newUser = User.RegisterNew(request.Username, request.Email, request.Password, _passwordHasher);
+
+        await _userRepository.AddAsync(newUser);
+
+        return new RegisterUserResult(
+            UserId: newUser.Id,
+            Username: newUser.UserName,
+            Email: newUser.Email.Value
+        );
     }
 }
