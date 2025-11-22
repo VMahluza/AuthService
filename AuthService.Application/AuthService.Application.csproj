@@ -12,4 +12,8 @@
     <Folder Include="Features\Auth\Queries\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="13.1.0" />
+  </ItemGroup>
+
 </Project>
