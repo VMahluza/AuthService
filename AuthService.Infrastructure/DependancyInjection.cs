@@ -5,6 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AuthService.Infrastructure.Database;  // Add this for IAuthConnectionFactory and AuthConnectionFactory
+using AuthService.Domain.Interfaces.Repositories;
+using AuthService.Infrastructure.Repositories;
+using AuthService.Domain.Interfaces;
+using AuthService.Infrastructure.Services;
 
 namespace AuthService.Infrastructure;
 
@@ -20,6 +24,12 @@ public static class DependencyInjection
         // Optionally, keep transient connection if needed directly, but prefer factory
         services.AddTransient(provider =>
             provider.GetRequiredService<IAuthConnectionFactory>().CreateConnection());
+
+
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+        // Register repositories
+        services.AddScoped<IUserRepository, UserRepository>();
         
         return services;
     }

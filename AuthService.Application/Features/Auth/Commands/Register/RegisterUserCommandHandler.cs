@@ -25,7 +25,7 @@ public class RegisterUserCommandHandler :
         CancellationToken cancellationToken)
     {
 
-        Task<User> existingUserByEmail = _userRepository
+        User existingUserByEmail = await _userRepository
             .GetByEmailAsync(request.Email);
         if (existingUserByEmail is not null)
         {
@@ -34,7 +34,7 @@ public class RegisterUserCommandHandler :
                 );
         }
 
-        var existingUserByUsername = _userRepository
+        var existingUserByUsername = await _userRepository
             .GetByUsernameAsync(request.UserName);
         if (existingUserByUsername is not null)
         {
