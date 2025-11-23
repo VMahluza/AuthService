@@ -17,12 +17,6 @@ public sealed record PasswordHash
         // Additional validation to check hash format/length could go here.
         return new PasswordHash(passwordHash);
     }
-    public bool Verify(string rawPassword, IPasswordHasher hasher)
-    {
-        // This logic will be implemented in the IPasswordHasher or similar service.
-        // For example: return hasher.Verify(rawPassword, this.Value);
-        throw new NotImplementedException();
-
-    }
+    public bool Verify(string rawPassword, IPasswordHasher hasher) =>  hasher.Verify(rawPassword, this);
     public override string ToString() => Value;
 }

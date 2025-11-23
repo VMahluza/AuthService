@@ -9,6 +9,7 @@ using System.Text;
 namespace AuthService.Domain.Entities.User;
 public class User : BaseEntity
 {
+   
     public string UserName { get; private set; }
     public EmailAddress Email { get; private set; }
     public PasswordHash PasswordHash { get; private set; }

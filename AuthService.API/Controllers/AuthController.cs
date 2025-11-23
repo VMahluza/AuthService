@@ -34,4 +34,11 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
+    {
+        // Implementation for login will go here
+        return Ok(request);
+    }
 }

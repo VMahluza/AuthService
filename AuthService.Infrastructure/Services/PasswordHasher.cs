@@ -9,5 +9,10 @@ namespace AuthService.Infrastructure.Services
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
             return PasswordHash.Create(hashedPassword);
         }
+
+        public bool Verify(string password, PasswordHash passwordHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash.Value);
+        }
     }
 }
