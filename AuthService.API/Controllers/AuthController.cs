@@ -1,4 +1,5 @@
 ﻿using AuthService.API.Contracts;
+using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +39,12 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
     {
-        // Implementation for login will go here
-        return Ok(request);
+        LoginUserCommand command =  new LoginUserCommand(
+            UserName: request.UserName,
+            Password: request.Password
+        );
+
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 }
