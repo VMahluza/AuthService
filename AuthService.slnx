@@ -2,6 +2,10 @@
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
   </Folder>
+  <Folder Name="/Solution Items/http/">
+    <File Path="auth.login.http" />
+    <File Path="auth.register.http" />
+  </Folder>
   <Project Path="AuthService.API/AuthService.API.csproj" Id="a584ceb1-1a06-480d-a108-fce5b917ffb4" />
   <Project Path="AuthService.Application/AuthService.Application.csproj" />
   <Project Path="AuthService.Domain/AuthService.Domain.csproj" />

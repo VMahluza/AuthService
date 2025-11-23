@@ -1,6 +1,7 @@
 ﻿using AuthService.Domain.Entities.User;
 using AuthService.Domain.Interfaces;
 using AuthService.Domain.Interfaces.Repositories;
+using AuthService.Domain.ValueObjects;
 using MediatR;
 
 namespace AuthService.Application.Features.Auth.Commands.Register;

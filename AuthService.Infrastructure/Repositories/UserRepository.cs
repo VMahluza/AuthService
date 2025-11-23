@@ -1,50 +1,108 @@
 ﻿using AuthService.Domain.Entities.User;
 using AuthService.Domain.Interfaces.Repositories;
+using AuthService.Domain.ValueObjects;
+using AuthService.Domain.Enums;
+using AuthService.Infrastructure.Database;
+using Dapper;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AuthService.Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository : BaseRepository<User>, IUserRepository
 {
-    public Task AddAsync(User entity)
+    public UserRepository(IAuthConnectionFactory connectionFactory) : base(connectionFactory)
     {
-        throw new NotImplementedException();
     }
 
-    public Task DeleteAsync(User entity)
+    public override async Task AddAsync(User userEntity)
     {
-        throw new NotImplementedException();
+        var sql = $@"
+            INSERT INTO {_tableName} (Id, UserName, Email, PasswordHash, Status, FailedLoginAttempts, CreatedAt, LastUpdatedAt)
+            VALUES (@Id, @UserName, @Email, @PasswordHash, @Status, @FailedLoginAttempts, @CreatedAt, @LastUpdatedAt)";
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(sql, new
+        {
+            Id = userEntity.Id.ToString(),
+            UserName = userEntity.UserName,
+            Email = userEntity.Email.Value,
+            PasswordHash = userEntity.PasswordHash.Value,
+            Status = userEntity.Status.ToString(),
+            FailedLoginAttempts = userEntity.FailedLoginAttempts,
+            CreatedAt = userEntity.CreatedAt,
+            LastUpdatedAt = userEntity.LastUpdatedAt
+        });
     }
 
-    public Task<bool> ExistsAsync(string email, string username)
+    public override async Task UpdateAsync(User userEntity)
     {
-        throw new NotImplementedException();
+        var sql = $@"
+            UPDATE {_tableName}
+            SET UserName = @UserName, Email = @Email, PasswordHash = @PasswordHash, Status = @Status, 
+                FailedLoginAttempts = @FailedLoginAttempts, LastUpdatedAt = @LastUpdatedAt
+            WHERE Id = @Id";
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(sql, new
+        {
+            Id = userEntity.Id.ToString(),
+            UserName = userEntity.UserName,
+            Email = userEntity.Email.Value,
+            PasswordHash = userEntity.PasswordHash.Value,
+            Status = userEntity.Status.ToString(),
+            FailedLoginAttempts = userEntity.FailedLoginAttempts,
+            LastUpdatedAt = DateTime.UtcNow
+        });
     }
 
-    public Task<User> GetByEmailAsync(string email)
+    public async Task<User> GetByEmailAsync(string email)
     {
-        throw new NotImplementedException();
+        var sql = $"SELECT * FROM {_tableName} WHERE Email = @Email";
+
+        using var connection = _connectionFactory.CreateConnection();
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { Email = email });
+        return result != null ? MapToEntity(result) : null;
     }
 
-    public Task<User> GetByIdAsync(Guid id)
+    public async Task<User> GetByUsernameAsync(string username)
     {
-        throw new NotImplementedException();
+        var sql = $"SELECT * FROM {_tableName} WHERE UserName = @UserName";
+
+        using var connection = _connectionFactory.CreateConnection();
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { UserName = username });
+        return result != null ? MapToEntity(result) : null;
     }
 
-    public Task<User> GetByUsernameAsync(string username)
+    public async Task<bool> ExistsAsync(string email, string username)
     {
-        throw new NotImplementedException();
+        var sql = $"SELECT COUNT(1) FROM {_tableName} WHERE Email = @Email OR UserName = @UserName";
+
+        using var connection = _connectionFactory.CreateConnection();
+        var count = await connection.ExecuteScalarAsync<int>(sql, new { Email = email, UserName = username });
+        return count > 0;
     }
 
-    public Task<IEnumerable<User>> GetPagedAsync(int pageNumber, int pageSize)
+    protected override User MapToEntity(dynamic result)
     {
-        throw new NotImplementedException();
-    }
+        var user = new User(
+            Guid.Parse(result.Id),
+            result.UserName,
+            EmailAddress.Create(result.Email),
+            PasswordHash.Create(result.PasswordHash),
+            Enum.Parse<UserStatus>(result.Status),
+            result.FailedLoginAttempts
+        );
 
-    public Task UpdateAsync(User entity)
-    {
-        throw new NotImplementedException();
+        // Set timestamps using reflection since setters are protected
+        var createdAtProperty = typeof(User).BaseType.GetProperty("CreatedAt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        createdAtProperty?.SetValue(user, result.CreatedAt);
+
+        var lastUpdatedAtProperty = typeof(User).BaseType.GetProperty("LastUpdatedAt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        lastUpdatedAtProperty?.SetValue(user, result.LastUpdatedAt);
+
+        return user;
     }
 }

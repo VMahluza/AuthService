@@ -1,6 +1,7 @@
 ﻿using AuthService.Domain.Entities.Common;
 using AuthService.Domain.Enums;
 using AuthService.Domain.Interfaces;
+using AuthService.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;

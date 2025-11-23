@@ -1,5 +1,5 @@
 ﻿using AuthService.Domain.Interfaces;
-
+namespace AuthService.Domain.ValueObjects;
 public sealed record PasswordHash
 {
 

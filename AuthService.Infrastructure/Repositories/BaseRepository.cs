@@ -2,10 +2,6 @@
 using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Infrastructure.Database;
 using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AuthService.Infrastructure.Repositories;
 
@@ -20,7 +16,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         _tableName = typeof(T).Name + "s"; // Convention: e.g., User -> Users
     }
 
-    public async Task AddAsync(T entity)
+    public virtual async Task AddAsync(T entity)
     {
         // This is a generic implementation; subclasses may override for specific field handling
         var sql = $@"
@@ -36,7 +32,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         });
     }
 
-    public async Task UpdateAsync(T entity)
+    public virtual async Task UpdateAsync(T entity)
     {
         var sql = $@"
             UPDATE {_tableName}
@@ -51,7 +47,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         });
     }
 
-    public async Task DeleteAsync(T entity)
+    public virtual async Task DeleteAsync(T entity)
     {
         var sql = $"DELETE FROM {_tableName} WHERE Id = @Id";
 
@@ -59,7 +55,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         await connection.ExecuteAsync(sql, new { Id = entity.Id.ToString() });
     }
 
-    public async Task<T> GetByIdAsync(Guid id)
+    public virtual async Task<T> GetByIdAsync(Guid id)
     {
         var sql = $"SELECT * FROM {_tableName} WHERE Id = @Id";
 
@@ -68,7 +64,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         return result != null ? MapToEntity(result) : default;
     }
 
-    public async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize)
+    public virtual async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize)
     {
         var sql = $"SELECT * FROM {_tableName} ORDER BY CreatedAt DESC LIMIT @Offset, @PageSize";
 

@@ -1,5 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 
+
+namespace AuthService.Domain.ValueObjects;
+
 public sealed record EmailAddress
 {
 
