@@ -19,13 +19,16 @@ public class LoginUserCommandHandler :
 
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
     public LoginUserCommandHandler(
         IUserRepository userRepository, 
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        IJwtTokenGenerator jwtTokenGenerator)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
+        _jwtTokenGenerator = jwtTokenGenerator;
     }
 
     public async Task<LoginUserResult> Handle(
@@ -38,9 +41,7 @@ public class LoginUserCommandHandler :
             throw new UnauthorizedAccessException("Invalid username or password.");
         }
 
-        var token = "";
-        // Save the user in a session and generate a JWT TOKEN
-        //var token = _tokenService.GenerateToken(user);
+        var token = _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
         return new LoginUserResult(
             user.Id, 
             user.UserName, 

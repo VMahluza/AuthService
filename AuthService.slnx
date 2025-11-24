@@ -2,6 +2,12 @@
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
   </Folder>
+  <Folder Name="/Solution Items/documentation/">
+    <File Path="documentation/AuthenticationService.drawio" />
+    <File Path="documentation/Designing a Domain-Driven Authentication Service with .NET 10, Dapper, and JWT.pdf" />
+    <File Path="documentation/Guide to Key Architecture and Design Diagrams for a DDD‑Based Authentication Service.pdf" />
+    <File Path="documentation/User Requirements Specification – Authentication and Identity Management Service.pdf" />
+  </Folder>
   <Folder Name="/Solution Items/http/">
     <File Path="auth.login.http" />
     <File Path="auth.register.http" />

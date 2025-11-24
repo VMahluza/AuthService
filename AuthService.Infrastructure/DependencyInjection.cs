@@ -16,17 +16,18 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Register the connection factory for better abstraction
+
         string connectionString = configuration.GetConnectionString("Default");
         services.AddSingleton<IAuthConnectionFactory>(provider =>
             new AuthConnectionFactory(connectionString));
 
-        // Optionally, keep transient connection if needed directly, but prefer factory
         services.AddTransient(provider =>
             provider.GetRequiredService<IAuthConnectionFactory>().CreateConnection());
 
-
+        // Register services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
         // Register repositories
         services.AddScoped<IUserRepository, UserRepository>();

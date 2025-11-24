@@ -64,7 +64,5 @@ public class AuthController : ControllerBase
                 StatusCodes.Status500InternalServerError, 
                 "Internal Server Error");
         }
-
-
     }
 }
