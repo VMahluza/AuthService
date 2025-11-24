@@ -3,6 +3,7 @@ using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using static System.Net.Mime.MediaTypeNames;
@@ -35,16 +36,35 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
     {
-        LoginUserCommand command =  new LoginUserCommand(
-            UserName: request.UserName,
-            Password: request.Password
-        );
 
-        var result = await _mediator.Send(command);
-        return Ok(result);
+        try
+        {
+            LoginUserCommand command = new LoginUserCommand(
+                UserName: request.UserName,
+                Password: request.Password
+            );
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(
+                "Unauthorized login attempt for user {UserName}", 
+                request.UserName);
+            return Unauthorized();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                StatusCodes.Status500InternalServerError, 
+                "Internal Server Error");
+        }
+
+
     }
 }

@@ -88,7 +88,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     protected override User MapToEntity(dynamic result)
     {
         var user = new User(
-            Guid.Parse(result.Id),
+            (Guid)result.Id,  // Cast to Guid instead of parsing
             result.UserName,
             EmailAddress.Create(result.Email),
             PasswordHash.Create(result.PasswordHash),
