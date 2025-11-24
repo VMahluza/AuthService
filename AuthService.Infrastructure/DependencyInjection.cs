@@ -33,7 +33,9 @@ public static class DependencyInjection
                 !string.IsNullOrEmpty(options.Secret) &&
                 !string.IsNullOrEmpty(options.Issuer) &&
                 !string.IsNullOrEmpty(options.Audience) &&
-                options.ExpiryMinutes > 0);
+                options.ExpiryMinutes > 0, 
+                "JWT Settings failed validation"
+                );
            
 
 
