@@ -9,6 +9,7 @@ using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Domain.Interfaces;
 using AuthService.Infrastructure.Services;
+using AuthService.Infrastructure.Settings;
 
 namespace AuthService.Infrastructure;
 
@@ -23,6 +24,9 @@ public static class DependencyInjection
 
         services.AddTransient(provider =>
             provider.GetRequiredService<IAuthConnectionFactory>().CreateConnection());
+
+        services.Configure<JwtSettingsOptions>(configuration.GetSection(JwtSettingsOptions.SectionName));
+     
 
         // Register services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
