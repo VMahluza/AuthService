@@ -26,7 +26,16 @@ public static class DependencyInjection
             provider.GetRequiredService<IAuthConnectionFactory>().CreateConnection());
 
         services.Configure<JwtSettingsOptions>(configuration.GetSection(JwtSettingsOptions.SectionName));
-     
+
+        services.AddOptions<JwtSettingsOptions>()
+            .BindConfiguration(JwtSettingsOptions.SectionName)
+            .Validate(options => 
+                !string.IsNullOrEmpty(options.Secret) &&
+                !string.IsNullOrEmpty(options.Issuer) &&
+                !string.IsNullOrEmpty(options.Audience) &&
+                options.ExpiryMinutes > 0);
+           
+
 
         // Register services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
