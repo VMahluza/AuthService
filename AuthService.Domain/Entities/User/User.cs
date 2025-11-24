@@ -27,11 +27,17 @@ public class User : BaseEntity
         FailedLoginAttempts = failedLoginAttempts;
     }
 
-    public static User RegisterNew(string userName, string email, string rawPassword, IPasswordHasher hasher)
+    public static User RegisterNew(string userName, string email, string hashedPassword)
     {
-        var emailAddress = EmailAddress.Create(email);
-        var passwordHash = PasswordHash.Create(hasher.Hash(rawPassword).ToString());
-        var newUserId = Guid.NewGuid();
+
+        Guid newUserId = Guid.NewGuid();
+
+        EmailAddress emailAddress = EmailAddress.Create(email);
+        PasswordHash passwordHash = PasswordHash.Create(hashedPassword);
+
+
+
+
         return new User(newUserId, userName, emailAddress, passwordHash, UserStatus.PendingVerification, 0);
     }
 }

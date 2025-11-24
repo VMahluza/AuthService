@@ -4,6 +4,7 @@ using AuthService.Domain.ValueObjects;
 using AuthService.Domain.Enums;
 using AuthService.Infrastructure.Database;
 using Dapper;
+using System.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,10 +98,10 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         );
 
         // Set timestamps using reflection since setters are protected
-        var createdAtProperty = typeof(User).BaseType.GetProperty("CreatedAt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var createdAtProperty = typeof(User).BaseType.GetProperty("CreatedAt", BindingFlags.NonPublic | BindingFlags.Instance);
         createdAtProperty?.SetValue(user, result.CreatedAt);
 
-        var lastUpdatedAtProperty = typeof(User).BaseType.GetProperty("LastUpdatedAt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var lastUpdatedAtProperty = typeof(User).BaseType.GetProperty("LastUpdatedAt", BindingFlags.NonPublic | BindingFlags.Instance);
         lastUpdatedAtProperty?.SetValue(user, result.LastUpdatedAt);
 
         return user;

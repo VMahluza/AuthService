@@ -24,7 +24,6 @@ public class RegisterUserCommandHandler :
         Handle(RegisterUserCommand request, 
         CancellationToken cancellationToken)
     {
-
         User existingUserByEmail = await _userRepository
             .GetByEmailAsync(request.Email);
         if (existingUserByEmail is not null)
@@ -43,12 +42,14 @@ public class RegisterUserCommandHandler :
                 );
         }
 
-        PasswordHash passwordHash = PasswordHash.Create(request.Password);
-
+        PasswordHash passwordHash = _passwordHasher.Hash(request.Password);
 
         EmailAddress emailAddress = EmailAddress.Create(request.Email);
+        
         User newUser = User.RegisterNew(
-            request.UserName, request.Email, request.Password, _passwordHasher);
+            request.UserName,
+            request.Email,
+            passwordHash.Value);
 
         await _userRepository.AddAsync(newUser);
 

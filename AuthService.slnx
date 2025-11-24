@@ -13,6 +13,7 @@
     <File Path="auth.register.http" />
   </Folder>
   <Folder Name="/Solution Items/SQL/">
+    <File Path="EmailVerificationToken.sql" />
     <File Path="User.sql" />
   </Folder>
   <Project Path="AuthService.API/AuthService.API.csproj" Id="a584ceb1-1a06-480d-a108-fce5b917ffb4" />
