@@ -10,6 +10,7 @@ using AuthService.Infrastructure.Repositories;
 using AuthService.Domain.Interfaces;
 using AuthService.Infrastructure.Services;
 using AuthService.Infrastructure.Settings;
+using AuthService.Domain.Interfaces.Services;
 
 namespace AuthService.Infrastructure;
 // nx todo research 
@@ -44,10 +45,14 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<IAuthEmailSender, AuthEmailSender>();
 
         // Register repositories
         services.AddScoped<IUserRepository, UserRepository>();
-        
+        services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
+
         return services;
     }
 }
