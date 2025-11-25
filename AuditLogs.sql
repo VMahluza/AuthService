@@ -1,0 +1,15 @@
+CREATE TABLE AuditLogs (
+	Id CHAR(36) PRIMARY KEY,
+	UserId CHAR(36) NOT NULL,
+	Action VARCHAR(150) NOT NULL,
+	Description TEXT NULL,
+	IpAddress VARCHAR(45) NULL,
+	CreatedAt DATETIME NOT NULL,
+	LastUpdatedAt DATETIME NULL,
+	FOREIGN KEY (UserId) REFERENCES Users(Id)
+);
+
+-- Optional: Index on UserId for querying logs per user
+CREATE INDEX IX_AuditLogs_UserId ON AuditLogs(UserId);
+-- Optional: Index on Action for querying specific actions
+CREATE INDEX IX_AuditLogs_Action ON AuditLogs(Action);

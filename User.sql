@@ -8,3 +8,4 @@ CREATE TABLE Users (
     CreatedAt DATETIME NOT NULL,
     LastUpdatedAt DATETIME NULL
 );
+

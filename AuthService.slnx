@@ -13,6 +13,7 @@
     <File Path="auth.register.http" />
   </Folder>
   <Folder Name="/Solution Items/SQL/">
+    <File Path="AuditLogs.sql" />
     <File Path="EmailVerificationToken.sql" />
     <File Path="User.sql" />
   </Folder>

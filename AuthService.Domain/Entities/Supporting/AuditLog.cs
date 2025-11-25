@@ -30,5 +30,16 @@ public class AuditLog : BaseEntity
         IpAddress = ipAddress;
     }
 
+    // Factory method to create a new log entry easily
+    public static AuditLog Create(Guid? userId, string action, string details, string ipAddress)
+    {
+        return new AuditLog(
+            Guid.NewGuid(),
+            userId ?? Guid.Empty,
+            action,
+            details,
+            ipAddress
+        );
+    }
 
 }
