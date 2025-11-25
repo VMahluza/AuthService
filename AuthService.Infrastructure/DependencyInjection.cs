@@ -12,6 +12,7 @@ using AuthService.Infrastructure.Services;
 using AuthService.Infrastructure.Settings;
 
 namespace AuthService.Infrastructure;
+// nx todo research 
 
 public static class DependencyInjection
 {

@@ -20,12 +20,18 @@ public class EmailVerificationToken : BaseEntity
     private EmailVerificationToken() { }
 
 
-    public EmailVerificationToken(Guid id, Guid userId) : base(id)
+    public EmailVerificationToken(
+        Guid id,
+        Guid userId,
+        string token,
+        DateTime expiresAt,
+        DateTime? usedAt)
+        : base(id)
     {
         UserId = userId;
-        Token = GenerateSecureToken();
-        
-        ExpiresAt = DateTime.UtcNow.AddHours(24); // Token valid for 24 hours
+        Token = token;         // Set the existing token from DB
+        ExpiresAt = expiresAt; // Set the existing expiry from DB
+        UsedAt = usedAt;
     }
 
     /// <summary>
