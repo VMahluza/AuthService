@@ -21,5 +21,6 @@
   <Project Path="AuthService.Application/AuthService.Application.csproj" />
   <Project Path="AuthService.Domain/AuthService.Domain.csproj" />
   <Project Path="AuthService.Infrastructure/AuthService.Infrastructure.csproj" Id="3fd105e5-ed8a-4f9e-a4fe-d1eae53a3943" />
+  <Project Path="AuthService.PlayGround/AuthService.PlayGround.csproj" Id="272d9de6-35c7-4cb7-8a32-3151146ff5ae" />
   <Project Path="AuthService.Tests/AuthService.Tests.csproj" Id="17a7bf5d-ff9e-4845-8a4d-9a59ea55382e" />
 </Solution>

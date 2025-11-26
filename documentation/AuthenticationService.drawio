@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e" pages="8">
     <diagram name="AuthService_UseCase" id="GDI563k5wWI6xeKt52gj">
-        <mxGraphModel dx="1342" dy="2845" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="1613" dy="3117" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -241,7 +241,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="AuthService_Sequence" id="qOCq6G8RxvOkzRxPFgc5">
-        <mxGraphModel dx="515" dy="507" grid="1" gridSize="1" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="786" dy="779" grid="1" gridSize="1" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="-6s3ActwmK3WsJSyRKTM-0"/>
                 <mxCell id="-6s3ActwmK3WsJSyRKTM-1" parent="-6s3ActwmK3WsJSyRKTM-0"/>
@@ -942,6 +942,192 @@
             <root>
                 <mxCell id="YOZC7g5UPzwJoha_DnRi-0"/>
                 <mxCell id="YOZC7g5UPzwJoha_DnRi-1" parent="YOZC7g5UPzwJoha_DnRi-0"/>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="AuthService_Registration_Sequence" id="RegSeq1234567890">
+        <mxGraphModel dx="855" dy="649" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="RegRoot0"/>
+                <mxCell id="RegLayer1" parent="RegRoot0"/>
+                <mxCell id="RegActor" value="" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="50" y="80" width="20" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="RegController" value="AuthController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="150" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="-qSIsboMxCAq_opC2Hpu-0" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="RegController">
+                    <mxGeometry x="45" y="70" width="10" height="470" as="geometry"/>
+                </mxCell>
+                <mxCell id="RegService" value="IAuthService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="300" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="-qSIsboMxCAq_opC2Hpu-2" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="RegService">
+                    <mxGeometry x="45" y="100" width="10" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="Msg2" value="Register(Request)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegService" source="-qSIsboMxCAq_opC2Hpu-2" target="RegService" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-100" y="110" as="sourcePoint"/>
+                        <mxPoint x="50" y="110" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="RegRepo" value="IUserRepo" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="450" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="-qSIsboMxCAq_opC2Hpu-4" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="RegRepo">
+                    <mxGeometry x="45" y="130" width="10" height="290" as="geometry"/>
+                </mxCell>
+                <mxCell id="RegHasher" value="PasswordHasher" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="600" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="-qSIsboMxCAq_opC2Hpu-6" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="RegHasher">
+                    <mxGeometry x="43.78714285714284" y="305" width="12.428571428571429" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="RegEmail" value="EmailSender" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="750" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="RegTokenRepo" value="ITokenRepo" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="RegLayer1">
+                    <mxGeometry x="900" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="RegAuditRepo" value="IAuditRepo" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="RegLayer1">
+                    <mxGeometry x="1050" y="80" width="100" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="Msg1" value="Register(Request)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegActor" target="RegController" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="60" y="160" as="sourcePoint"/>
+                        <mxPoint x="200" y="160" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="120" y="160"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg3" value="FindByEmail(email)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegService" target="RegRepo" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="220" as="sourcePoint"/>
+                        <mxPoint x="500" y="220" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="420" y="220"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg4" value="user (null/obj)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" parent="RegLayer1" source="RegRepo" target="RegService" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="500" y="250" as="sourcePoint"/>
+                        <mxPoint x="350" y="250" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="420" y="250"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="AltFrame" value="alt" style="shape=umlFrame;whiteSpace=wrap;html=1;width=30;height=15;" parent="RegLayer1" vertex="1">
+                    <mxGeometry x="100" y="270" width="870" height="360" as="geometry"/>
+                </mxCell>
+                <mxCell id="AltText1" value="[User Exists]" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="AltFrame" vertex="1">
+                    <mxGeometry x="37.285714285714285" width="99.42857142857143" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="ElseSep" value="[else]" style="line;strokeWidth=1;dashed=1;labelPosition=center;verticalLabelPosition=bottom;align=left;verticalAlign=top;spacingLeft=20;spacingTop=15;html=1;whiteSpace=wrap;" parent="AltFrame" vertex="1">
+                    <mxGeometry y="120" width="870" height="12" as="geometry"/>
+                </mxCell>
+                <mxCell id="Msg5" value="Error: User Exists" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" parent="RegLayer1" source="RegService" target="RegController" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="300" as="sourcePoint"/>
+                        <mxPoint x="200" y="300" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="270" y="300"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg6" value="409 Conflict" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" parent="RegLayer1" source="RegController" target="RegActor" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="330" as="sourcePoint"/>
+                        <mxPoint x="60" y="330" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="120" y="330"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg7" value="Hash(password)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegService" target="RegHasher" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="400" as="sourcePoint"/>
+                        <mxPoint x="650" y="400" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="500" y="400"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg8" value="hashedPassword" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" parent="RegLayer1" source="RegHasher" target="RegService" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="650" y="430" as="sourcePoint"/>
+                        <mxPoint x="350" y="430" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="500" y="430"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg9" value="Add(user)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegService" target="RegRepo" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="460" as="sourcePoint"/>
+                        <mxPoint x="500" y="460" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="420" y="460"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg10" value="Add(token)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegService" target="RegTokenRepo" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="490" as="sourcePoint"/>
+                        <mxPoint x="950" y="490" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="650" y="490"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg11" value="SendVerification(email, token)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegService" target="RegEmail" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="520" as="sourcePoint"/>
+                        <mxPoint x="800" y="520" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="570" y="520"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg12" value="Add(auditLog)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" parent="RegLayer1" source="RegService" target="RegAuditRepo" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="550" as="sourcePoint"/>
+                        <mxPoint x="1100" y="550" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="720" y="550"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="-qSIsboMxCAq_opC2Hpu-1" value="" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="RegLayer1" source="RegController" target="-qSIsboMxCAq_opC2Hpu-2">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="199" y="190" as="sourcePoint"/>
+                        <mxPoint x="350" y="190" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="270" y="190"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg13" value="Success" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" edge="1" parent="RegLayer1" source="RegService" target="RegController">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="580" as="sourcePoint"/>
+                        <mxPoint x="200" y="580" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="270" y="580"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Msg14" value="201 Created" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" edge="1" parent="RegLayer1" source="RegController" target="RegActor">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="610" as="sourcePoint"/>
+                        <mxPoint x="60" y="610" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="120" y="610"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>
