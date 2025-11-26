@@ -10,8 +10,3 @@ CREATE TABLE IF NOT EXISTS AuditLogs (
     LastUpdatedAt DATETIME NULL,
     FOREIGN KEY (UserId) REFERENCES Users(Id)
 );
-
--- Optional: Index on UserId for querying logs per user
-CREATE INDEX IF NOT EXISTS IX_AuditLogs_UserId ON AuditLogs(UserId);
--- Optional: Index on Action for querying specific actions
-CREATE INDEX IF NOT EXISTS IX_AuditLogs_Action ON AuditLogs(Action);

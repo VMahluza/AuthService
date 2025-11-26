@@ -12,6 +12,13 @@
     <File Path="auth.login.http" />
     <File Path="auth.register.http" />
   </Folder>
+  <Folder Name="/Solution Items/initdb/">
+    <File Path="04_apply_indexes.sql" />
+    <File Path="initdb/01_Users.sql" />
+    <File Path="initdb/02_EmailVerificationTokens.sql" />
+    <File Path="initdb/03_AuditLogs.sql" />
+  </Folder>
+  <Folder Name="/Solution Items/Scripts/" />
   <Folder Name="/Solution Items/SQL/">
     <File Path="AuditLogs.sql" />
     <File Path="EmailVerificationToken.sql" />

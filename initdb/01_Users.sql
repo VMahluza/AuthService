@@ -10,4 +10,3 @@ CREATE TABLE IF NOT EXISTS Users (
     CreatedAt DATETIME NOT NULL,
     LastUpdatedAt DATETIME NULL
 );
-

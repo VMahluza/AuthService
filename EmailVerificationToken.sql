@@ -1,4 +1,6 @@
-CREATE TABLE EmailVerificationTokens (
+USE authservice_db;
+
+CREATE TABLE IF NOT EXISTS EmailVerificationTokens (
     Id CHAR(36) PRIMARY KEY,
     UserId CHAR(36) NOT NULL,
     Token VARCHAR(256) NOT NULL,  -- Base64 encoded 32 bytes is ~44 chars, but allowing some buffer
@@ -10,7 +12,7 @@ CREATE TABLE EmailVerificationTokens (
 );
 
 -- Optional: Index on Token for fast lookups during verification
-CREATE INDEX IX_EmailVerificationTokens_Token ON EmailVerificationTokens(Token);
+CREATE INDEX IF NOT EXISTS IX_EmailVerificationTokens_Token ON EmailVerificationTokens(Token);
 
 -- Optional: Index on UserId for querying tokens per user
-CREATE INDEX IX_EmailVerificationTokens_UserId ON EmailVerificationTokens(UserId);
+CREATE INDEX IF NOT EXISTS IX_EmailVerificationTokens_UserId ON EmailVerificationTokens(UserId);

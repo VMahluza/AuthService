@@ -40,12 +40,13 @@ public static class DependencyInjection
                 );
            
 
-
         // Register services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<IAuthEmailSender, AuthEmailSender>();
+        services.AddScoped<IServerAddress, ServerAddress>();
+        services.AddScoped<IBase64TokenGenerator, Base64TokenGenerator>(); 
 
         // Register repositories
         services.AddScoped<IUserRepository, UserRepository>();

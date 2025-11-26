@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 
-
 namespace AuthService.Infrastructure.Services;
 
 public class ServerAddress : IServerAddress
