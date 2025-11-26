@@ -16,6 +16,7 @@ CREATE INDEX IX_AuditLogs_UserId ON AuditLogs(UserId);
 CREATE INDEX IX_AuditLogs_Action ON AuditLogs(Action);
 CREATE INDEX IX_AuditLogs_CreatedAt ON AuditLogs(CreatedAt);
 CREATE INDEX IX_AuditLogs_IpAddress ON AuditLogs(IpAddress);
+CREATE INDEX IX_AuditLogs_ExpiresAt ON AuditLogs(ExpiresAt); -- Important for cleanup performance
 
 -- Composite indexes for common query patterns
 CREATE INDEX IX_AuditLogs_UserId_CreatedAt ON AuditLogs(UserId, CreatedAt);
