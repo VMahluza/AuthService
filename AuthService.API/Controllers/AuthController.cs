@@ -2,6 +2,7 @@
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Register;
 using AuthService.Application.Features.Auth.Commands.VarifyEmail;
+using AuthService.Application.Features.Auth.Commands.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -40,11 +41,47 @@ public class AuthController : ControllerBase
     [HttpGet("verify-email")]
     public async Task<IActionResult> VerifyEmail([FromQuery] string token)
     {
-        VarifyEmailCommand command = new VarifyEmailCommand(
-            token: token
-        );
-        var result = await _mediator.Send(command);
-        return Ok(result);
+        try
+        {
+            VerifyEmailCommand command = new VerifyEmailCommand(
+                token: token
+            );
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+
+            _logger.LogWarning(
+                "Invalid email verification attempt with token {Token}: {Message}",
+                token, ex.Message);
+
+            return BadRequest(
+                new VerifyEmailResponse
+                (
+                    false,
+                   "Email verification failed: " + ex.Message
+                )
+            );
+        }
+        catch (NullReferenceException ex)
+        {
+            _logger.LogWarning(
+                "Email verification attempt with token {Token} failed: {Message}",
+                token, ex.Message);
+            return BadRequest(
+                new VerifyEmailResponse
+                (
+                    false,
+                   "Email verification failed: " + ex.Message
+                ));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new VerifyEmailResponse(false, "Internal Server Error"));
+        }
     }
 
     [HttpPost("login")]
