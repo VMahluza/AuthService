@@ -1,6 +1,7 @@
 ﻿using AuthService.API.Contracts;
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Register;
+using AuthService.Application.Features.Auth.Commands.VarifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -36,7 +37,15 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+    {
+        VarifyEmailCommand command = new VarifyEmailCommand(
+            token: token
+        );
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request)

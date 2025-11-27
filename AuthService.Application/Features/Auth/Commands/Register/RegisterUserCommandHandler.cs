@@ -67,7 +67,6 @@ public class RegisterUserCommandHandler :
 
     private async Task LogEvent(RegisterUserCommand request, User newUser)
     {
-
         var ipAddress = await _serverAddress.GetCurrentIPv4ServerAddress();
 
         var auditLog = new AuditLog(
@@ -90,7 +89,6 @@ public class RegisterUserCommandHandler :
             DateTime.UtcNow.AddHours(24),
             null
         );
-
      
         await _emailVerificationTokenRepository.AddAsync(emailVerificationToken);
         await _authEmailSender.SendVarificationEmailAsync(newUser, token);
