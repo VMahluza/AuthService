@@ -16,13 +16,24 @@ public class AuthEmailSender : IAuthEmailSender
         _logger = logger;
     }
 
-    public Task SendVarificationEmailAsync(User user, string token)
+    public async Task SendEmailVerificationSuccessAsync(User user)
     {
-        // In a real implementation, this would use SmtpClient or an HTTP API.
-        // Here, we just log it so you can copy-paste the token for testing.
+        _logger.LogInformation(@"
+            **************************************************
+            EMAIL SIMULATION
+            To: {Email}
+            Subject: Account Verified Successfully!
+            
+            Dear {Username},
+            Your email has been successfully verified. You can now log in to your account.
+            **************************************************
+            ", user.Email.Value, user.UserName);
+    }
 
-        // Note: We assume the API is running on https://localhost:5001
-        var verificationLink = $"https://localhost:5001/api/auth/verify-email?token={token}";
+    public async Task SendVarificationEmailAsync(User user, string token)
+    {
+
+        var verificationLink = $"http://localhost:5102/api/auth/verify-email?token={token}";
 
         _logger.LogInformation(@"
             **************************************************
@@ -37,7 +48,5 @@ public class AuthEmailSender : IAuthEmailSender
             (Token: {Token})
             **************************************************
             ", user.Email.Value, user.UserName, verificationLink, token);
-
-        return Task.CompletedTask;
     }
 }

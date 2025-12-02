@@ -1,14 +1,10 @@
 ﻿using AuthService.API.Contracts;
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Register;
-using AuthService.Application.Features.Auth.Commands.VarifyEmail;
 using AuthService.Application.Features.Auth.Commands.VerifyEmail;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace AuthService.API.Controllers;
 
@@ -51,7 +47,6 @@ public class AuthController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-
             _logger.LogWarning(
                 "Invalid email verification attempt with token {Token}: {Message}",
                 token, ex.Message);

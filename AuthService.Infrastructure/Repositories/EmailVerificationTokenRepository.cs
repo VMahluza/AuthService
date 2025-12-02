@@ -48,11 +48,9 @@ public class EmailVerificationTokenRepository : BaseRepository<EmailVerification
 
     protected override EmailVerificationToken MapToEntity(dynamic result)
     {
-        var id = Guid.Parse((string)result.Id);
-        var userId = Guid.Parse((string)result.UserId);
         var token = new EmailVerificationToken(
-            id,
-            userId,
+            (Guid)result.Id,
+            (Guid)result.UserId,
             result.Token,
             result.ExpiresAt,
             result.UsedAt

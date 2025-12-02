@@ -70,17 +70,30 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, VerifyEmai
             );
 
         await _userRepository.UpdateAsync(updatedUser);
+        await _authEmailSender.SendEmailVerificationSuccessAsync(updatedUser);
+
     }
 
     private async Task<EmailVerificationToken?> CheckAndUpdateEmailVarificationToken(VerifyEmailCommand request)
     {
-        var emailToken = await _emailVerificationTokenRepository.GetByTokenAsync(request.token);
-        if (emailToken is null)
+        try
         {
-            throw new NullReferenceException("Invalid token.");
+            var emailToken = await _emailVerificationTokenRepository.GetByTokenAsync(request.token);
+            if (emailToken is null)
+            {
+                throw new NullReferenceException("Invalid token.");
+            }
+
+            emailToken.Consume();
+            return emailToken;
+
+        }
+        catch (Exception ex)
+        {
+
+            throw new Exception("An error occurred while verifying the email: " + ex.Message);
+        
         }
 
-        emailToken.Consume();
-        return emailToken;
     }
 }
