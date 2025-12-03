@@ -13,13 +13,19 @@ namespace AuthService.Application.Features.Auth.Commands.VerifyEmail;
 public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, VerifyEmailResult>
 {
 
+    // Repositories
     private readonly IEmailVerificationTokenRepository _emailVerificationTokenRepository;
     private readonly IUserRepository _userRepository;
     private readonly IAuditLogRepository _auditLogRepository;
 
+    // Services 
     private readonly IAuthEmailSender _authEmailSender;
     private readonly IServerAddress _serverAddress;
-    public VerifyEmailHandler(IEmailVerificationTokenRepository emailVerificationTokenRepository, IUserRepository userRepository, IAuthEmailSender authEmailSender, IAuditLogRepository auditLogRepository, IServerAddress serverAddress)
+    public VerifyEmailHandler(
+        IEmailVerificationTokenRepository emailVerificationTokenRepository, 
+        IUserRepository userRepository, IAuthEmailSender authEmailSender, 
+        IAuditLogRepository auditLogRepository, IServerAddress serverAddress
+        )
     {
         _emailVerificationTokenRepository = emailVerificationTokenRepository;
         _userRepository = userRepository;
@@ -107,8 +113,6 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, VerifyEmai
             "User email verified successfully.",
             serverIpAddress
             );
-
         await _auditLogRepository.AddAsync(log);
-
     }
 }
