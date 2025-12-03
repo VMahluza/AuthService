@@ -24,7 +24,6 @@ public class UserSession : BaseEntity
 
     public static UserSession Create(Guid userId, string refreshToken, DateTime expiresAt)
     {
-
           return new UserSession
         {
             UserId = userId,
