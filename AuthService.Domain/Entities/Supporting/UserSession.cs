@@ -22,10 +22,23 @@ public class UserSession : BaseEntity
 
     private UserSession() { }
 
+    public UserSession(Guid id, Guid userId, string refreshToken, DateTime expiresAt)
+    {
+        Id = id;
+        UserId = userId;
+        JwtToken = refreshToken;
+        IssuedAt = DateTime.UtcNow;
+        ExpiresAt = expiresAt;
+        RevokedAt = null;
+    }
+
+
     public static UserSession Create(Guid userId, string refreshToken, DateTime expiresAt)
     {
-          return new UserSession
+      
+        return new UserSession
         {
+            Id = Guid.NewGuid(),
             UserId = userId,
             JwtToken = refreshToken,
             IssuedAt = DateTime.UtcNow,

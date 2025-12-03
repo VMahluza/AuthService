@@ -23,6 +23,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
             INSERT INTO {_tableName} (Id, CreatedAt, LastUpdatedAt)
             VALUES (@Id, @CreatedAt, @LastUpdatedAt)";
 
+
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new
         {

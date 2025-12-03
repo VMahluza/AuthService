@@ -38,7 +38,6 @@ public class AuditLogRepository : BaseRepository<AuditLog>, IAuditLogRepository
             IpAddress = auditLog.IpAddress,
             CreatedAt = auditLog.CreatedAt,
             LastUpdatedAt = auditLog.LastUpdatedAt
-
         };
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql.ToString(), parameters);
