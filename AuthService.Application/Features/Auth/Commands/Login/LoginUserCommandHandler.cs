@@ -80,6 +80,10 @@ public class LoginUserCommandHandler :
             if (user.FailedLoginAttempts + 1 >= _securitySettingsOptions.MaxFailedAccessAttempts)
             {
                 user.LockAccount();
+                await _userRepository.UpdateAsync(user);
+                // Optional : Notify user of account lockout via email/SMS
+                throw new UnauthorizedAccessException($"Max failed login attempts reached. Account locked. wait for {_securitySettingsOptions.DefaultLockoutTimeSpanInMinutes} Minutes and Try again");
+
             }
             await _userRepository.UpdateAsync(user);
             throw new UnauthorizedAccessException("Invalid username or password.");
