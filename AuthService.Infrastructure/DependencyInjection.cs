@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AuthService.Domain.Interfaces;
+using AuthService.Domain.Interfaces.Repositories;
+using AuthService.Domain.Interfaces.Services;
+using AuthService.Domain.Settings;
+using AuthService.Infrastructure.Database;  // Add this for IAuthConnectionFactory and AuthConnectionFactory
+using AuthService.Infrastructure.Repositories;
+using AuthService.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AuthService.Infrastructure.Database;  // Add this for IAuthConnectionFactory and AuthConnectionFactory
-using AuthService.Domain.Interfaces.Repositories;
-using AuthService.Infrastructure.Repositories;
-using AuthService.Domain.Interfaces;
-using AuthService.Infrastructure.Services;
-using AuthService.Infrastructure.Settings;
-using AuthService.Domain.Interfaces.Services;
 
 namespace AuthService.Infrastructure;
 // nx todo research 
@@ -31,14 +31,14 @@ public static class DependencyInjection
 
         services.AddOptions<JwtSettingsOptions>()
             .BindConfiguration(JwtSettingsOptions.SectionName)
-            .Validate(options => 
+            .Validate(options =>
                 !string.IsNullOrEmpty(options.Secret) &&
                 !string.IsNullOrEmpty(options.Issuer) &&
                 !string.IsNullOrEmpty(options.Audience) &&
-                options.ExpiryMinutes > 0, 
+                options.ExpiryMinutes > 0,
                 "JWT Settings failed validation"
                 );
-           
+
 
         // Register services
         services.AddScoped<IPasswordHasher, PasswordHasher>();

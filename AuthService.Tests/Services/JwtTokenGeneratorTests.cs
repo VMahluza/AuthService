@@ -1,6 +1,6 @@
 ﻿using AuthService.Domain.Interfaces;
+using AuthService.Domain.Settings;
 using AuthService.Infrastructure.Services;
-using AuthService.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Moq;

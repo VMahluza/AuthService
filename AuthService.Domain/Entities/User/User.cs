@@ -34,10 +34,23 @@ public class User : BaseEntity
 
         EmailAddress emailAddress = EmailAddress.Create(email);
         PasswordHash passwordHash = PasswordHash.Create(hashedPassword);
-
-
-
-
         return new User(newUserId, userName, emailAddress, passwordHash, UserStatus.PendingVerification, 0);
+    }
+
+    public void UpdateLoginAttempts(bool isSuccess)
+    {
+        if (isSuccess)
+        {
+            FailedLoginAttempts = 0;
+        }
+        else
+        {
+            FailedLoginAttempts += 1;
+        }
+    }
+
+    public void LockAccount()
+    {
+        Status = UserStatus.Locked;
     }
 }

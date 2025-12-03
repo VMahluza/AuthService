@@ -1,5 +1,5 @@
 ﻿using AuthService.Domain.Interfaces;
-using AuthService.Infrastructure.Settings;
+using AuthService.Domain.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
