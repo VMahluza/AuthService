@@ -1,4 +1,5 @@
-﻿using AuthService.Domain.Entities.Supporting;
+﻿using AuthService.Domain.Constants;
+using AuthService.Domain.Entities.Supporting;
 using AuthService.Domain.Entities.User;
 using AuthService.Domain.Enums;
 using AuthService.Domain.Interfaces.Repositories;
@@ -14,26 +15,28 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, VerifyEmai
 
     private readonly IEmailVerificationTokenRepository _emailVerificationTokenRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IAuditLogRepository _auditLogRepository;
+
     private readonly IAuthEmailSender _authEmailSender;
-    public VerifyEmailHandler(IEmailVerificationTokenRepository emailVerificationTokenRepository, IUserRepository userRepository, IAuthEmailSender authEmailSender)
+    private readonly IServerAddress _serverAddress;
+    public VerifyEmailHandler(IEmailVerificationTokenRepository emailVerificationTokenRepository, IUserRepository userRepository, IAuthEmailSender authEmailSender, IAuditLogRepository auditLogRepository, IServerAddress serverAddress)
     {
         _emailVerificationTokenRepository = emailVerificationTokenRepository;
         _userRepository = userRepository;
         _authEmailSender = authEmailSender;
+        _serverAddress = serverAddress;
+        _auditLogRepository = auditLogRepository;
     }
 
     public async Task<VerifyEmailResult> Handle(VerifyEmailCommand request, CancellationToken cancellationToken)
     {
         EmailVerificationToken? emailToken = await CheckAndUpdateEmailVarificationToken(request);
 
-        if (emailToken is null)
-        {
-            throw new NullReferenceException("Token expired or not found");
-        }
-
+        if (emailToken is null) throw new NullReferenceException("Token expired");
+        
         await UpdateUserStatus(emailToken);
         await UpdateUsedToken(emailToken);
-
+        await LogTokenVarificationEvent(emailToken);
         return new VerifyEmailResult(true, "Email verified successfully.");
     }
 
@@ -90,10 +93,22 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, VerifyEmai
         }
         catch (Exception ex)
         {
-
-            throw new Exception("An error occurred while verifying the email: " + ex.Message);
-        
+            throw new Exception("An error occurred while verifying the email: " + ex.Message); 
         }
+
+    }
+
+    private async Task LogTokenVarificationEvent(EmailVerificationToken emailToken)
+    {
+        string serverIpAddress = await _serverAddress.GetCurrentIPv4ServerAddress();
+        AuditLog log = AuditLog.Create(
+            emailToken.UserId,
+            AuditLogActions.EmailVerified.ToString(),
+            "User email verified successfully.",
+            serverIpAddress
+            );
+
+        await _auditLogRepository.AddAsync(log);
 
     }
 }
