@@ -1,4 +1,5 @@
-﻿using AuthService.Domain.Entities.Common;
+﻿using AuthService.Domain.DTOs;
+using AuthService.Domain.Entities.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,25 +23,25 @@ public class UserSession : BaseEntity
 
     private UserSession() { }
 
-    public UserSession(Guid id, Guid userId, string refreshToken, DateTime expiresAt)
+    public UserSession(Guid id, Guid userId, AuthenticationResult refreshToken, DateTime expiresAt)
     {
         Id = id;
         UserId = userId;
-        JwtToken = refreshToken;
+        JwtToken = refreshToken.RefreshToken;
         IssuedAt = DateTime.UtcNow;
         ExpiresAt = expiresAt;
         RevokedAt = null;
     }
 
 
-    public static UserSession Create(Guid userId, string refreshToken, DateTime expiresAt)
+    public static UserSession Create(Guid userId, AuthenticationResult  refreshToken, DateTime expiresAt)
     {
       
         return new UserSession
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            JwtToken = refreshToken,
+            JwtToken = refreshToken.RefreshToken,
             IssuedAt = DateTime.UtcNow,
             ExpiresAt = expiresAt,
             RevokedAt = null

@@ -1,6 +1,8 @@
-﻿namespace AuthService.Domain.Interfaces;
+﻿using AuthService.Domain.DTOs;
+
+namespace AuthService.Domain.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(Guid userId, string userName, string email);
+    AuthenticationResult GenerateToken(Guid userId, string userName, string email);
 }

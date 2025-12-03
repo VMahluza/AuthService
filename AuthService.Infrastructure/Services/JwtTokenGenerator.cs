@@ -21,6 +21,10 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
     public string GenerateToken(Guid userId, string userName, string email)
     {
+
+        // TODO: Need to return AuthenticationResult including refresh token
+
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
@@ -43,4 +47,11 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
+
+public record AuthenticationResult(
+    string AccessToken,
+    string RefreshToken,
+    string Jti,
+    DateTime ExpiresAt
+);
 

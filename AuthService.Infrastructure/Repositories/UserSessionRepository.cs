@@ -40,16 +40,29 @@ public class UserSessionRepository :BaseRepository<UserSession>,  IUserSessionRe
         await connection.ExecuteAsync(sql.ToString(), parameters);
     }
 
-    public Task<UserSession?> GetActiveSessionByTokenAsync(string jwtToken)
+    public async Task<UserSession?> GetActiveSessionByTokenAsync(string jwtToken)
     {
-
-        throw new NotImplementedException();
+        var sql = $"SELECT * FROM {_tableName} WHERE JwtToken = @JwtToken";
+        using var connection = _connectionFactory.CreateConnection();
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { JwtToken = jwtToken });
+        return result != null ? MapToEntity(result) : default;
     }
 
-    public Task<IEnumerable<UserSession>> GetActiveSessionsByUserIdPageAsync(Guid userId, int pageNumber, int pageSize)
+    public async Task<IEnumerable<UserSession>> GetActiveSessionsByUserIdPageAsync(Guid userId, int pageNumber, int pageSize)
     {
-        throw new NotImplementedException();
+        var sql = $"SELECT * FROM {_tableName} WHERE UserId = @UserId LIMIT @Offset, @PageSize";
+
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<dynamic>(sql, new
+        {
+            UserId = userId.ToString(),
+            Offset = (pageNumber - 1) * pageSize,
+            PageSize = pageSize
+        });
+        return results.Select(MapToEntity);
     }
+
+
 
     protected override UserSession MapToEntity(dynamic result)
     {

@@ -1,4 +1,6 @@
-﻿using AuthService.Domain.Entities.User;
+﻿using AuthService.Domain.DTOs;
+using AuthService.Domain.Entities.Supporting;
+using AuthService.Domain.Entities.User;
 using AuthService.Domain.Enums;
 using AuthService.Domain.Interfaces;
 using AuthService.Domain.Interfaces.Repositories;
@@ -18,6 +20,8 @@ public class LoginUserCommandHandler :
 {
 
     private readonly IUserRepository _userRepository;
+    private readonly IUserSessionRepository _userSessionRepository;
+
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly SecuritySettingsOptions _securitySettingsOptions;
@@ -26,11 +30,13 @@ public class LoginUserCommandHandler :
         IUserRepository userRepository, 
         IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator,
+        IUserSessionRepository userSessionRepository,
         IOptions<SecuritySettingsOptions> securitySettingsOptions)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _userSessionRepository = userSessionRepository;
         _securitySettingsOptions = securitySettingsOptions.Value;
     }
 
@@ -42,14 +48,15 @@ public class LoginUserCommandHandler :
         await DoAccountStatusChecks(user);
         await VarifyPassword(request, user);
 
-        var token = _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
-
+        AuthenticationResult token = _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
+        var userSession = UserSession.Create(user.Id, token, DateTime.Now);
+        await _userSessionRepository.AddAsync(userSession);
 
         return new LoginUserResult(
             user.Id,
             user.UserName,
             user.Email.Value,
-            token
+            token.RefreshToken
             );
 
         async Task<User> GetUserForLoginAsync(LoginUserCommand request)
@@ -78,7 +85,6 @@ public class LoginUserCommandHandler :
                 await _userRepository.UpdateAsync(user);
                 // Optional : Notify user of account lockout via email/SMS
                 throw new UnauthorizedAccessException($"Max failed login attempts reached. Account locked. wait for {_securitySettingsOptions.DefaultLockoutTimeSpanInMinutes} Minutes and Try again");
-
             }
             await _userRepository.UpdateAsync(user);
             throw new UnauthorizedAccessException("Invalid username or password.");
