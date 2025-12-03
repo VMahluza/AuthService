@@ -5,11 +5,6 @@ using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Domain.Options;
 using MediatR;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Security.Principal;
-using System.Text;
 
 namespace AuthService.Application.Features.Auth.Commands.Login;
 
@@ -47,9 +42,9 @@ public class LoginUserCommandHandler :
         await DoAccountStatusChecks(user);
         await VarifyPassword(request, user);
 
-        // Successful Authentication & JWT Issuance:
-
         var token = _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
+
+
         return new LoginUserResult(
             user.Id,
             user.UserName,
