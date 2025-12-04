@@ -92,7 +92,7 @@ public class LoginUserCommandHandler :
             {
                 user.LockAccount();
                 await _userRepository.UpdateAsync(user);
-                // Optional : Notify user of account lockout via email/SMS
+                // TODO : Notify user of account lockout via email/SMS
                 throw new UnauthorizedAccessException($"Max failed login attempts reached. Account locked. wait for {_securitySettings.DefaultLockoutTimeSpanInMinutes} Minutes and Try again");
             }
             await _userRepository.UpdateAsync(user);
@@ -128,7 +128,7 @@ public class LoginUserCommandHandler :
     /// </summary>
     private async Task EnforceConcurrentSessionPolicyAsync(Guid userId)
     {
-        // If MaxConcurrentSessions is 0 or negative, allow unlimited sessions
+
         if (_securitySettings.MaxConcurrentSessions <= 0)
         {
             _logger.LogDebug("Unlimited concurrent sessions allowed for user: {UserId}", userId);
@@ -180,7 +180,6 @@ public class LoginUserCommandHandler :
 
                 case SessionEnforcementStrategy.Unlimited:
                 default:
-                    // No enforcement
                     break;
             }
         }

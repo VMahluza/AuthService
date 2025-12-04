@@ -31,7 +31,7 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
             entity.IssuedAt,
             entity.ExpiresAt,
             entity.RevokedAt,
-            entity.CreatedAt,
+            CreatedAt = DateTime.Now,
             entity.LastUpdatedAt
         };
         
