@@ -1,4 +1,5 @@
-﻿using AuthService.Domain.Entities.Supporting;
+﻿using AuthService.Domain.DTOs;
+using AuthService.Domain.Entities.Supporting;
 using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Infrastructure.Database;
 using Dapper;
@@ -94,7 +95,6 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
         return results.Select(MapToEntity);
     }
 
-    // ✅ NEW METHOD
     public async Task<IEnumerable<UserSession>> GetActiveSessionsByUserIdAsync(Guid userId)
     {
         var sql = $@"
@@ -114,7 +114,6 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
         return results.Select(MapToEntity);
     }
 
-    // ✅ NEW METHOD
     public async Task<int> GetActiveSessionsCountAsync(Guid userId)
     {
         var sql = $@"
@@ -136,16 +135,16 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
         var userSession = new UserSession(
             (Guid)result.Id,
             (Guid)result.UserId,
-            new AuthService.Domain.DTOs.AuthenticationResult
-            {
-                AccessToken = result.JwtToken,
-                RefreshToken = result.JwtToken,
-                ExpiresAt = (DateTime)result.ExpiresAt
-            },
+            new AuthenticationResult(
+                result.JwtToken,
+                result.JwtToken,
+                Guid.NewGuid().ToString(), 
+                (DateTime)result.ExpiresAt
+            ),
+     
             (DateTime)result.ExpiresAt
         );
 
-        // Set private properties using reflection
         var issuedAtProperty = typeof(UserSession).GetProperty("IssuedAt");
         issuedAtProperty?.SetValue(userSession, result.IssuedAt);
 

@@ -54,11 +54,11 @@ public class LoginUserCommandHandler :
         User user = await GetUserForLoginAsync(request);
         await DoAccountStatusChecks(user);
         await VarifyPassword(request, user);
-
+        
+        await EnforceConcurrentSessionPolicyAsync(user.Id);
         AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
-        
-        
         var userSession = UserSession.Create(user.Id, token, token.ExpiresAt);
+        
         await _userSessionRepository.AddAsync(userSession);
 
         return new LoginUserResult(

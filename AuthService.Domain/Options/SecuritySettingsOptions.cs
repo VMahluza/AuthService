@@ -1,4 +1,6 @@
 ﻿
+using AuthService.Domain.Enums;
+
 namespace AuthService.Domain.Options;
 public class SecuritySettingsOptions
 {
@@ -8,6 +10,6 @@ public class SecuritySettingsOptions
         public required int DefaultLockoutTimeSpanInMinutes { get; set; }
         public int MaxConcurrentSessions { get; set; } = 0;
 
-    public SessionEnforcementStrategy SessionEnforcement { get; set; } = SessionEnforcementStrategy.RevokeOldest;
+        public SessionEnforcementStrategy SessionEnforcement { get; set; } = SessionEnforcementStrategy.RevokeOldest;
 }
 
