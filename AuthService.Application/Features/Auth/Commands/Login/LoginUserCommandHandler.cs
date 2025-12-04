@@ -65,7 +65,7 @@ public class LoginUserCommandHandler :
             user.Id,
             user.UserName,
             user.Email.Value,
-            token.RefreshToken
+            token.AccessToken
             );
 
         async Task<User> GetUserForLoginAsync(LoginUserCommand request)
