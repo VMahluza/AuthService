@@ -2,18 +2,15 @@
 using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Infrastructure.Database;
 using Dapper;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
 namespace AuthService.Infrastructure.Repositories;
-public class UserSessionRepository :BaseRepository<UserSession>,  IUserSessionRepository
-{
 
+public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRepository
+{
     public UserSessionRepository(IAuthConnectionFactory connectionFactory) : base(connectionFactory)
     {
-        
     }
 
     public override async Task AddAsync(UserSession entity)
@@ -36,43 +33,127 @@ public class UserSessionRepository :BaseRepository<UserSession>,  IUserSessionRe
             entity.CreatedAt,
             entity.LastUpdatedAt
         };
+        
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql.ToString(), parameters);
     }
 
+    public override async Task UpdateAsync(UserSession entity)
+    {
+        var sql = $@"
+            UPDATE {_tableName}
+            SET RevokedAt = @RevokedAt, LastUpdatedAt = @LastUpdatedAt
+            WHERE Id = @Id";
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(sql.ToString(), new
+        {
+            entity.Id,
+            entity.RevokedAt,
+            LastUpdatedAt = DateTime.UtcNow
+        });
+    }
+
     public async Task<UserSession?> GetActiveSessionByTokenAsync(string jwtToken)
     {
-        var sql = $"SELECT * FROM {_tableName} WHERE JwtToken = @JwtToken";
+        var sql = $@"
+            SELECT * FROM {_tableName} 
+            WHERE JwtToken = @JwtToken 
+              AND RevokedAt IS NULL 
+              AND ExpiresAt > @Now";
+              
         using var connection = _connectionFactory.CreateConnection();
-        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { JwtToken = jwtToken });
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new 
+        { 
+            JwtToken = jwtToken,
+            Now = DateTime.UtcNow
+        });
+        
         return result != null ? MapToEntity(result) : default;
     }
 
     public async Task<IEnumerable<UserSession>> GetActiveSessionsByUserIdPageAsync(Guid userId, int pageNumber, int pageSize)
     {
-        var sql = $"SELECT * FROM {_tableName} WHERE UserId = @UserId LIMIT @Offset, @PageSize";
+        var sql = $@"
+            SELECT * FROM {_tableName} 
+            WHERE UserId = @UserId 
+              AND RevokedAt IS NULL 
+              AND ExpiresAt > @Now
+            ORDER BY IssuedAt DESC
+            LIMIT @Offset, @PageSize";
 
         using var connection = _connectionFactory.CreateConnection();
         var results = await connection.QueryAsync<dynamic>(sql, new
         {
             UserId = userId.ToString(),
+            Now = DateTime.UtcNow,
             Offset = (pageNumber - 1) * pageSize,
             PageSize = pageSize
         });
+        
         return results.Select(MapToEntity);
     }
 
+    // ✅ NEW METHOD
+    public async Task<IEnumerable<UserSession>> GetActiveSessionsByUserIdAsync(Guid userId)
+    {
+        var sql = $@"
+            SELECT * FROM {_tableName} 
+            WHERE UserId = @UserId 
+              AND RevokedAt IS NULL 
+              AND ExpiresAt > @Now
+            ORDER BY IssuedAt ASC";
 
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<dynamic>(sql, new
+        {
+            UserId = userId.ToString(),
+            Now = DateTime.UtcNow
+        });
+        
+        return results.Select(MapToEntity);
+    }
+
+    // ✅ NEW METHOD
+    public async Task<int> GetActiveSessionsCountAsync(Guid userId)
+    {
+        var sql = $@"
+            SELECT COUNT(*) FROM {_tableName} 
+            WHERE UserId = @UserId 
+              AND RevokedAt IS NULL 
+              AND ExpiresAt > @Now";
+
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.ExecuteScalarAsync<int>(sql, new
+        {
+            UserId = userId.ToString(),
+            Now = DateTime.UtcNow
+        });
+    }
 
     protected override UserSession MapToEntity(dynamic result)
     {
-        UserSession userSession = new UserSession(
-
+        var userSession = new UserSession(
             (Guid)result.Id,
             (Guid)result.UserId,
-            result.JwtToken,
+            new AuthService.Domain.DTOs.AuthenticationResult
+            {
+                AccessToken = result.JwtToken,
+                RefreshToken = result.JwtToken,
+                ExpiresAt = (DateTime)result.ExpiresAt
+            },
             (DateTime)result.ExpiresAt
         );
+
+        // Set private properties using reflection
+        var issuedAtProperty = typeof(UserSession).GetProperty("IssuedAt");
+        issuedAtProperty?.SetValue(userSession, result.IssuedAt);
+
+        var revokedAtProperty = typeof(UserSession).GetProperty("RevokedAt");
+        if (result.RevokedAt != null)
+        {
+            revokedAtProperty?.SetValue(userSession, (DateTime?)result.RevokedAt);
+        }
 
         var createdAtProperty = typeof(UserSession).BaseType.GetProperty("CreatedAt", BindingFlags.NonPublic | BindingFlags.Instance);
         createdAtProperty?.SetValue(userSession, result.CreatedAt);
@@ -81,6 +162,5 @@ public class UserSessionRepository :BaseRepository<UserSession>,  IUserSessionRe
         lastUpdatedAtProperty?.SetValue(userSession, result.LastUpdatedAt);
 
         return userSession;
-
     }
 }

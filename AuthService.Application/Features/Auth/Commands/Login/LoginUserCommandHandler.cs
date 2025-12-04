@@ -6,6 +6,7 @@ using AuthService.Domain.Interfaces;
 using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Domain.Options;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AuthService.Application.Features.Auth.Commands.Login;
@@ -21,23 +22,29 @@ public class LoginUserCommandHandler :
 
     private readonly IUserRepository _userRepository;
     private readonly IUserSessionRepository _userSessionRepository;
+    private readonly IAuditLogRepository _auditLogRepository;
 
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly SecuritySettingsOptions _securitySettingsOptions;
+    private readonly SecuritySettingsOptions _securitySettings;
+    private readonly ILogger<LoginUserCommandHandler> _logger;  
 
     public LoginUserCommandHandler(
         IUserRepository userRepository, 
         IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator,
         IUserSessionRepository userSessionRepository,
-        IOptions<SecuritySettingsOptions> securitySettingsOptions)
+        IAuditLogRepository auditLogRepository,
+        IOptions<SecuritySettingsOptions> securitySettingsOptions,
+        ILogger<LoginUserCommandHandler> logger)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
         _userSessionRepository = userSessionRepository;
-        _securitySettingsOptions = securitySettingsOptions.Value;
+        _auditLogRepository = auditLogRepository;
+        _securitySettings = securitySettingsOptions.Value;
+        _logger = logger;
     }
 
     public async Task<LoginUserResult> Handle(
@@ -49,7 +56,9 @@ public class LoginUserCommandHandler :
         await VarifyPassword(request, user);
 
         AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
-        var userSession = UserSession.Create(user.Id, token, DateTime.Now);
+        
+        
+        var userSession = UserSession.Create(user.Id, token, token.ExpiresAt);
         await _userSessionRepository.AddAsync(userSession);
 
         return new LoginUserResult(
@@ -79,12 +88,12 @@ public class LoginUserCommandHandler :
      
             user.UpdateLoginAttempts(false);
            
-            if (user.FailedLoginAttempts + 1 >= _securitySettingsOptions.MaxFailedAccessAttempts)
+            if (user.FailedLoginAttempts + 1 >= _securitySettings.MaxFailedAccessAttempts)
             {
                 user.LockAccount();
                 await _userRepository.UpdateAsync(user);
                 // Optional : Notify user of account lockout via email/SMS
-                throw new UnauthorizedAccessException($"Max failed login attempts reached. Account locked. wait for {_securitySettingsOptions.DefaultLockoutTimeSpanInMinutes} Minutes and Try again");
+                throw new UnauthorizedAccessException($"Max failed login attempts reached. Account locked. wait for {_securitySettings.DefaultLockoutTimeSpanInMinutes} Minutes and Try again");
             }
             await _userRepository.UpdateAsync(user);
             throw new UnauthorizedAccessException("Invalid username or password.");
@@ -112,5 +121,68 @@ public class LoginUserCommandHandler :
                 break;
         }
        
+    }
+
+    /// <summary>
+    /// Enforces the concurrent session policy based on configuration
+    /// </summary>
+    private async Task EnforceConcurrentSessionPolicyAsync(Guid userId)
+    {
+        // If MaxConcurrentSessions is 0 or negative, allow unlimited sessions
+        if (_securitySettings.MaxConcurrentSessions <= 0)
+        {
+            _logger.LogDebug("Unlimited concurrent sessions allowed for user: {UserId}", userId);
+            return;
+        }
+
+        var activeSessions = (await _userSessionRepository.GetActiveSessionsByUserIdAsync(userId)).ToList();
+
+        _logger.LogDebug(
+            "User {UserId} has {ActiveSessionCount} active sessions. Max allowed: {MaxSessions}",
+            userId,
+            activeSessions.Count,
+            _securitySettings.MaxConcurrentSessions);
+
+        // Check if we're at or over the limit
+        if (activeSessions.Count >= _securitySettings.MaxConcurrentSessions)
+        {
+            switch (_securitySettings.SessionEnforcement)
+            {
+                case SessionEnforcementStrategy.DenyNew:
+                    _logger.LogWarning(
+                        "Login denied for user {UserId}. Maximum concurrent sessions ({MaxSessions}) reached.",
+                        userId,
+                        _securitySettings.MaxConcurrentSessions);
+
+                    throw new UnauthorizedAccessException(
+                        $"Maximum concurrent sessions ({_securitySettings.MaxConcurrentSessions}) reached. " +
+                        "Please log out from another device or wait for a session to expire.");
+
+                case SessionEnforcementStrategy.RevokeOldest:
+                    // Calculate how many sessions need to be revoked
+                    int sessionsToRevoke = activeSessions.Count - _securitySettings.MaxConcurrentSessions + 1;
+                    var sessionsToRevoke_List = activeSessions
+                        .OrderBy(s => s.IssuedAt)
+                        .Take(sessionsToRevoke)
+                        .ToList();
+
+                    foreach (var session in sessionsToRevoke_List)
+                    {
+                        session.Revoke();
+                        await _userSessionRepository.UpdateAsync(session);
+
+                        _logger.LogInformation(
+                            "Revoked oldest session {SessionId} for user {UserId} due to concurrent session limit",
+                            session.Id,
+                            userId);
+                    }
+                    break;
+
+                case SessionEnforcementStrategy.Unlimited:
+                default:
+                    // No enforcement
+                    break;
+            }
+        }
     }
 }

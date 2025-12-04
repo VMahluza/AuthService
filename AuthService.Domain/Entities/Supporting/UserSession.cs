@@ -42,7 +42,7 @@ public class UserSession : BaseEntity
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            JwtToken = authenticationResult.RefreshToken,
+            JwtToken = authenticationResult.AccessToken,
             IssuedAt = DateTime.UtcNow,
             ExpiresAt = expiresAt,
             RevokedAt = null
