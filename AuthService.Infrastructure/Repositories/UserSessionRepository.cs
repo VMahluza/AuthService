@@ -70,7 +70,7 @@ public class UserSessionRepository :BaseRepository<UserSession>,  IUserSessionRe
 
             (Guid)result.Id,
             (Guid)result.UserId,
-            (string)result.JwtToken,
+            result.JwtToken,
             (DateTime)result.ExpiresAt
         );
 

@@ -3,6 +3,7 @@ using AuthService.Domain.Entities.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace AuthService.Domain.Entities.Supporting;
@@ -19,29 +20,29 @@ public class UserSession : BaseEntity
     /// If null, the session is valid. If set, the session was manually killed (Logout).
     /// </summary>
     public DateTime? RevokedAt { get; private set; }
-    public bool IsActive => RevokedAt == null && DateTime.UtcNow < ExpiresAt;
+   
 
     private UserSession() { }
 
-    public UserSession(Guid id, Guid userId, AuthenticationResult refreshToken, DateTime expiresAt)
+    public UserSession(Guid id, Guid userId, AuthenticationResult authenticationResult, DateTime expiresAt)
     {
         Id = id;
         UserId = userId;
-        JwtToken = refreshToken.RefreshToken;
+        JwtToken = authenticationResult.AccessToken;
         IssuedAt = DateTime.UtcNow;
         ExpiresAt = expiresAt;
         RevokedAt = null;
     }
 
 
-    public static UserSession Create(Guid userId, AuthenticationResult  refreshToken, DateTime expiresAt)
+    public static UserSession Create(Guid userId, AuthenticationResult authenticationResult, DateTime expiresAt)
     {
       
         return new UserSession
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            JwtToken = refreshToken.RefreshToken,
+            JwtToken = authenticationResult.RefreshToken,
             IssuedAt = DateTime.UtcNow,
             ExpiresAt = expiresAt,
             RevokedAt = null
@@ -54,5 +55,11 @@ public class UserSession : BaseEntity
         {
             RevokedAt = DateTime.UtcNow;
         }
+    }
+
+    public bool IsActiveSession()
+    {
+
+        return RevokedAt == null && DateTime.UtcNow < ExpiresAt;
     }
 }

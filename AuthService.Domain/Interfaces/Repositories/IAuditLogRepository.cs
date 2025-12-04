@@ -9,5 +9,6 @@ public interface IAuditLogRepository : IRepository<AuditLog>
 {
     Task AddAsync(AuditLog auditLog);
     Task<IEnumerable<AuditLog>> GetPagedAsync(int pageNumber, int pageSize);
+    Task<IEnumerable<AuditLog>> GetPagedAsync(Guid userId, int pageNumber, int pageSize);
 
 }

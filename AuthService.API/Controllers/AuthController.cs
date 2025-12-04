@@ -2,6 +2,7 @@
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Register;
 using AuthService.Application.Features.Auth.Commands.VerifyEmail;
+using AuthService.Application.Features.Auth.Queries.GetAuditLogsByUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,7 +76,7 @@ public class AuthController : ControllerBase
         {
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
-                new VerifyEmailResponse(false, "Internal Server Error"));
+                new VerifyEmailResponse(false, $"Internal Server Error :{ex.Message}"));
         }
     }
 
@@ -96,15 +97,44 @@ public class AuthController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
+            var result = new { 
+                Message = $"Unauthorized login attempt for user {request.UserName}: {ex.Message}"
+            };
             _logger.LogWarning(
-                "Unauthorized login attempt for user {UserName}", 
-                request.UserName);
-            return Unauthorized();
+                "Unauthorized login attempt for user {UserName}: {Message}",
+                request.UserName, ex.Message);
+            return Unauthorized(result);
         }
         catch (Exception ex)
         {
             return StatusCode(
                 StatusCodes.Status500InternalServerError, 
+                "Internal Server Error");
+        }
+    }
+
+    [HttpGet("audit-logs/{userId:guid}")]
+    public async Task<IActionResult> GetAuditLogsByUser(
+        Guid userId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            GetAuditLogsByUserQuery query = new GetAuditLogsByUserQuery(
+                UserId: userId,
+                PageNumber: pageNumber,
+                PageSize: pageSize
+            );
+
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving audit logs for user {UserId}", userId);
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
                 "Internal Server Error");
         }
     }

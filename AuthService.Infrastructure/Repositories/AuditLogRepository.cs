@@ -44,6 +44,29 @@ public class AuditLogRepository : BaseRepository<AuditLog>, IAuditLogRepository
         //await base.AddAsync(auditLog);
     }
 
+    public async Task<IEnumerable<AuditLog>> GetPagedAsync(Guid userId, int pageNumber, int pageSize)
+    {
+
+        var sql = new StringBuilder($"SELECT * FROM {_tableName} WHERE UserId = @UserId ");
+        sql.Append("ORDER BY CreatedAt DESC ");
+        sql.Append("LIMIT @PageSize OFFSET @Offset;");
+        var parameters = new
+        {
+            UserId = userId.ToString(),
+            Offset = (pageNumber - 1) * pageSize,
+            PageSize = pageSize
+        };
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<dynamic>(sql.ToString(), parameters);
+        var auditLogs = new List<AuditLog>();
+        foreach (var result in results)
+        {
+            auditLogs.Add(MapToEntity(result));
+        }
+        return auditLogs;
+    }
+
+
     protected override AuditLog MapToEntity(dynamic result)
     {
         var auditLog = new AuditLog(

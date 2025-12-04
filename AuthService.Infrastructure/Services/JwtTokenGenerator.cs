@@ -1,4 +1,5 @@
-﻿using AuthService.Domain.Interfaces;
+﻿using AuthService.Domain.DTOs;
+using AuthService.Domain.Interfaces;
 using AuthService.Domain.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -13,13 +14,15 @@ namespace AuthService.Infrastructure.Services;
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly JwtSettingsOptions _jwtSettings;
+    private readonly IBase64TokenGenerator _refreshTokenGenerator;
 
-    public JwtTokenGenerator(IOptions<JwtSettingsOptions> jwtSettings)
-    { 
+    public JwtTokenGenerator(IOptions<JwtSettingsOptions> jwtSettings, IBase64TokenGenerator refreshTokenGenerator)
+    {
         _jwtSettings = jwtSettings.Value;
+        _refreshTokenGenerator = refreshTokenGenerator;
     }
 
-    public string GenerateToken(Guid userId, string userName, string email)
+    public async Task<AuthenticationResult> GenerateToken(Guid userId, string userName, string email)
     {
 
         // TODO: Need to return AuthenticationResult including refresh token
@@ -35,23 +38,26 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
 
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: expiresAt,
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        string accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+        string refreshToken = await _refreshTokenGenerator.GenerateToken();
+
+        return new AuthenticationResult(
+            AccessToken: accessToken,
+            RefreshToken: refreshToken,
+            Jti: Guid.NewGuid().ToString(),
+            ExpiresAt: expiresAt
+        );
     }
 }
 
-public record AuthenticationResult(
-    string AccessToken,
-    string RefreshToken,
-    string Jti,
-    DateTime ExpiresAt
-);
 

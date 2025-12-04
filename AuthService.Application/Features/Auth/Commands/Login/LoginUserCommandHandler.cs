@@ -48,7 +48,7 @@ public class LoginUserCommandHandler :
         await DoAccountStatusChecks(user);
         await VarifyPassword(request, user);
 
-        AuthenticationResult token = _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
+        AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
         var userSession = UserSession.Create(user.Id, token, DateTime.Now);
         await _userSessionRepository.AddAsync(userSession);
 

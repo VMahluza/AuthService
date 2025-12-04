@@ -1,4 +1,5 @@
 ﻿using AuthService.Domain.Interfaces;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
 
 namespace AuthService.Infrastructure.Services;
@@ -10,7 +11,7 @@ public class Base64TokenGenerator : IBase64TokenGenerator
     public async Task<string> GenerateToken()
     {
         byte[] tokenBytes = RandomNumberGenerator.GetBytes(TokenByteSize);
-        string token = Convert.ToBase64String(tokenBytes);
+        string token = WebEncoders.Base64UrlEncode(tokenBytes);
         
         return await Task.FromResult(token);
     }
