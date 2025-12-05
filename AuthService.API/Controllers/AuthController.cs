@@ -1,5 +1,6 @@
 ﻿using AuthService.API.Contracts;
 using AuthService.Application.Features.Auth.Commands.Login;
+using AuthService.Application.Features.Auth.Commands.Logout;
 using AuthService.Application.Features.Auth.Commands.Register;
 using AuthService.Application.Features.Auth.Commands.VerifyEmail;
 using AuthService.Application.Features.Auth.Queries.GetAuditLogsByUser;
@@ -137,5 +138,29 @@ public class AuthController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 "Internal Server Error");
         }
+    }
+
+    [HttpDelete("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogoutUserRequest request)
+    {
+        try
+        {
+            var command = new LogoutUserCommand(
+                  JwtToken: request.JwtToken,
+                  RevokeAllSessions: request.RevokeAllSessions
+              );
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            var result = new LogoutUserResponse(
+                false,
+                $"Failed to Logout:{ex.Message}"
+                );
+            return BadRequest(result);
+        }
+  
     }
 }

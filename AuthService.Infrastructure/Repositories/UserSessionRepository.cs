@@ -5,6 +5,7 @@ using AuthService.Infrastructure.Database;
 using Dapper;
 using System.Reflection;
 using System.Text;
+using static Dapper.SqlMapper;
 
 namespace AuthService.Infrastructure.Repositories;
 
@@ -28,7 +29,7 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
             entity.Id,
             entity.UserId,
             entity.JwtToken,
-            entity.IssuedAt,
+            IssuedAt = DateTime.UtcNow,
             entity.ExpiresAt,
             entity.RevokedAt,
             CreatedAt = DateTime.Now,
@@ -130,6 +131,16 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
         });
     }
 
+    public async Task DeleteAsync(Guid userId)
+    {
+
+        var sql = $"DELETE FROM {_tableName} WHERE UserId = @UserId";
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(sql, new { UserId = userId.ToString() });
+        
+    }
+
     protected override UserSession MapToEntity(dynamic result)
     {
         var userSession = new UserSession(
@@ -162,4 +173,6 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
 
         return userSession;
     }
+
+
 }

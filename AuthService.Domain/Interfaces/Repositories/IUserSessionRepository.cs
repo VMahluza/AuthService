@@ -17,5 +17,11 @@ public interface IUserSessionRepository : IRepository<UserSession>
     /// Gets count of active sessions for a user
     /// </summary>
     Task<int> GetActiveSessionsCountAsync(Guid userId);
+
+
+    /// <summary>
+    /// Removes all Sessions by user
+    /// </summary>
+    Task DeleteAsync(Guid userId);
 }
 

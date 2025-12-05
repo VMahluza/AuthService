@@ -37,7 +37,8 @@ public class UserSession : BaseEntity
 
     public static UserSession Create(Guid userId, AuthenticationResult authenticationResult, DateTime expiresAt)
     {
-      
+
+       
         return new UserSession
         {
             Id = Guid.NewGuid(),
