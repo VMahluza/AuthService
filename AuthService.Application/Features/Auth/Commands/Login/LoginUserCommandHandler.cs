@@ -1,9 +1,11 @@
-﻿using AuthService.Domain.DTOs;
+﻿using AuthService.Domain.Constants;
+using AuthService.Domain.DTOs;
 using AuthService.Domain.Entities.Supporting;
 using AuthService.Domain.Entities.User;
 using AuthService.Domain.Enums;
 using AuthService.Domain.Interfaces;
 using AuthService.Domain.Interfaces.Repositories;
+using AuthService.Domain.Interfaces.Services;
 using AuthService.Domain.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -27,7 +29,8 @@ public class LoginUserCommandHandler :
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly SecuritySettingsOptions _securitySettings;
-    private readonly ILogger<LoginUserCommandHandler> _logger;  
+    private readonly ILogger<LoginUserCommandHandler> _logger;
+    private readonly IServerAddress _serverAddress;
 
     public LoginUserCommandHandler(
         IUserRepository userRepository, 
@@ -36,7 +39,9 @@ public class LoginUserCommandHandler :
         IUserSessionRepository userSessionRepository,
         IAuditLogRepository auditLogRepository,
         IOptions<SecuritySettingsOptions> securitySettingsOptions,
-        ILogger<LoginUserCommandHandler> logger)
+        ILogger<LoginUserCommandHandler> logger,
+        IServerAddress serverAddress
+        )
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
@@ -45,6 +50,7 @@ public class LoginUserCommandHandler :
         _auditLogRepository = auditLogRepository;
         _securitySettings = securitySettingsOptions.Value;
         _logger = logger;
+        _serverAddress = serverAddress;
     }
 
     public async Task<LoginUserResult> Handle(
@@ -54,12 +60,17 @@ public class LoginUserCommandHandler :
         User user = await GetUserForLoginAsync(request);
         await DoAccountStatusChecks(user);
         await VarifyPassword(request, user);
-        
-        await EnforceConcurrentSessionPolicyAsync(user.Id);
-        AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
-        var userSession = UserSession.Create(user.Id, token, token.ExpiresAt);
-        
-        await _userSessionRepository.AddAsync(userSession);
+        AuthenticationResult token = await CreateSession(user);
+
+
+        var auditLog = AuditLog.Create(
+            user.Id,
+            AuditLogActions.LoginSuccess,
+            $"User {user.UserName} logged in successfully.",
+            await _serverAddress.GetCurrentIPv4ServerAddress()
+            );
+
+        await _auditLogRepository.AddAsync(auditLog);
 
         return new LoginUserResult(
             user.Id,
@@ -67,18 +78,28 @@ public class LoginUserCommandHandler :
             user.Email.Value,
             token.AccessToken
             );
+    }
 
-        async Task<User> GetUserForLoginAsync(LoginUserCommand request)
+    private async Task<AuthenticationResult> CreateSession(User user)
+    {
+        await EnforceConcurrentSessionPolicyAsync(user.Id);
+        AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
+        var userSession = UserSession.Create(user.Id, token, token.ExpiresAt);
+
+        await _userSessionRepository.AddAsync(userSession);
+        return token;
+    }
+
+    private async Task<User> GetUserForLoginAsync(LoginUserCommand request)
+    {
+        User user = await _userRepository.GetByUsernameAsync(request.UserName);
+        if (user == null)
         {
-            User user = await _userRepository.GetByUsernameAsync(request.UserName);
-            if (user == null)
-            {
-                // Failed Authentication Handling:
-                throw new UnauthorizedAccessException("Invalid username or password.");
-            }
-            // Credential Authentication:
-            return user;
+            // Failed Authentication Handling:
+            throw new UnauthorizedAccessException("Invalid username or password.");
         }
+        // Credential Authentication:
+        return user;
     }
 
     private async Task VarifyPassword(LoginUserCommand request, User? user)
