@@ -140,6 +140,22 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
         
     }
 
+    public async Task InvalidateAllForUserAsync(Guid userId)
+    {
+        var sql = $@"
+            UPDATE {_tableName}
+            SET RevokedAt = @RevokedAt, LastUpdatedAt = @LastUpdatedAt
+            WHERE UserId = @UserId AND RevokedAt IS NULL";
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(sql, new
+        {
+            UserId = userId.ToString(),
+            RevokedAt = DateTime.UtcNow,
+            LastUpdatedAt = DateTime.UtcNow
+        });
+    }
+
     protected override UserSession MapToEntity(dynamic result)
     {
         var userSession = new UserSession(

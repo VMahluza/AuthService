@@ -49,4 +49,26 @@ public class AuthEmailSender : IAuthEmailSender
             **************************************************
             ", user.Email.Value, user.UserName, verificationLink, token);
     }
+
+    public async Task SendPasswordResetEmailAsync(User user, string token)
+    {
+        var resetLink = $"http://localhost:5102/api/auth/reset-password?token={token}";
+
+        _logger.LogInformation(@"
+            **************************************************
+            EMAIL SIMULATION
+            To: {Email}
+            Subject: Password Reset Request
+            
+            Hello {Username},
+            You requested to reset your password. Click the link below to reset it:
+            {Link}
+            
+            This link will expire in 1 hour.
+            If you didn't request this, please ignore this email.
+            
+            (Token: {Token})
+            **************************************************
+            ", user.Email.Value, user.UserName, resetLink, token);
+    }
 }

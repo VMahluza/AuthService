@@ -23,5 +23,10 @@ public interface IUserSessionRepository : IRepository<UserSession>
     /// Removes all Sessions by user
     /// </summary>
     Task DeleteAsync(Guid userId);
+
+    /// <summary>
+    /// Invalidates (revokes) all active sessions for a user
+    /// </summary>
+    Task InvalidateAllForUserAsync(Guid userId);
 }
 
