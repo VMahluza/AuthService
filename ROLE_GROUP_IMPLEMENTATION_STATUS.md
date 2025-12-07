@@ -28,20 +28,33 @@
 ? DI Registration:
 - Updated DependencyInjection.cs
 
+## ? API Contracts - COMPLETED
+
+### Role Management Contracts:
+? CreateRoleRequest.cs
+? UpdateRoleRequest.cs
+? RoleResponse.cs
+? AssignRoleRequest.cs
+? AssignRoleResponse.cs
+? UserRoleResponse.cs
+? RoleUsersResponse.cs
+? RolesListResponse.cs
+
+### Group Management Contracts:
+? CreateGroupRequest.cs
+? UpdateGroupRequest.cs
+? GroupResponse.cs
+? AddUserToGroupRequest.cs
+? AddUserToGroupResponse.cs
+? UserGroupResponse.cs
+? GroupUsersResponse.cs
+? GroupsListResponse.cs
+
+### Common Contracts:
+? DeleteResponse.cs
+? UserSummaryResponse.cs (included in RoleUsersResponse.cs)
+
 ## Remaining Files Needed
-
-### API Contracts (AuthService.API\Contracts\)
-1. **Role Management:**
-   - CreateRoleRequest.cs
-   - UpdateRoleRequest.cs
-   - RoleResponse.cs
-   - AssignRoleRequest.cs
-
-2. **Group Management:**
-   - CreateGroupRequest.cs
-   - UpdateGroupRequest.cs
-   - GroupResponse.cs
-   - AddUserToGroupRequest.cs
 
 ### Application Commands (AuthService.Application\Features\)
 
