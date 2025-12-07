@@ -77,6 +77,8 @@ public class AuditLogRepository : BaseRepository<AuditLog>, IAuditLogRepository
             result.IpAddress
         );
 
+
+
         var createdAtProperty = typeof(AuditLog).BaseType.GetProperty("CreatedAt", BindingFlags.NonPublic | BindingFlags.Instance);
         createdAtProperty?.SetValue(auditLog, result.CreatedAt);
 

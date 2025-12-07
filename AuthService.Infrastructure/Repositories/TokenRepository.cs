@@ -61,12 +61,12 @@ public class TokenRepository<T> : BaseRepository<T>, ITokenRepository<T>
         var sql = "SELECT * FROM Tokens WHERE Token = @Token AND TokenType = @TokenType";
 
         using var connection = _connectionFactory.CreateConnection();
-        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(
+        var result = await connection.QuerySingleOrDefaultAsync<T>(
             sql, 
             new { Token = token, TokenType = _tokenType.ToString() }
         );
         
-        return result != null ? MapToEntity(result) : null;
+        return result;
     }
 
     public async Task<IEnumerable<T>> GetByUserIdAsync(Guid userId)
@@ -74,12 +74,12 @@ public class TokenRepository<T> : BaseRepository<T>, ITokenRepository<T>
         var sql = "SELECT * FROM Tokens WHERE UserId = @UserId AND TokenType = @TokenType ORDER BY CreatedAt DESC";
 
         using var connection = _connectionFactory.CreateConnection();
-        var results = await connection.QueryAsync<dynamic>(
+        var results = await connection.QueryAsync<T>(
             sql,
             new { UserId = userId, TokenType = _tokenType.ToString() }
         );
 
-        return results.Select(MapToEntity);
+        return results;
     }
 
     public async Task InvalidateAllForUserAsync(Guid userId)
@@ -101,37 +101,7 @@ public class TokenRepository<T> : BaseRepository<T>, ITokenRepository<T>
 
     protected override T MapToEntity(dynamic result)
     {
-        // Use reflection to create the correct type
-        var constructor = typeof(T).GetConstructor(
-            BindingFlags.NonPublic | BindingFlags.Instance,
-            null,
-            new[] { typeof(Guid), typeof(Guid), typeof(string), typeof(DateTime), typeof(DateTime?) },
-            null
-        );
-
-        if (constructor == null)
-        {
-            throw new InvalidOperationException($"Cannot find appropriate constructor for type {typeof(T).Name}");
-        }
-
-        var token = (T)constructor.Invoke(new object[] 
-        { 
-            (Guid)result.Id,
-            (Guid)result.UserId,
-            (string)result.Token,
-            (DateTime)result.ExpiresAt,
-            result.UsedAt != null ? (DateTime?)result.UsedAt : null
-        });
-
-        // Set base entity properties using reflection
-        var baseType = typeof(ExpiringToken).BaseType; // BaseEntity
-        
-        var createdAtProperty = baseType?.GetProperty("CreatedAt", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        createdAtProperty?.SetValue(token, result.CreatedAt);
-
-        var lastUpdatedAtProperty = baseType?.GetProperty("LastUpdatedAt", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        lastUpdatedAtProperty?.SetValue(token, result.LastUpdatedAt);
-
-        return token;
+        // Not used - Dapper handles mapping directly using the parameterless constructor
+        throw new NotImplementedException("This method is not used. Dapper maps directly to type T.");
     }
 }
