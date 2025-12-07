@@ -6,10 +6,10 @@ using System.Text;
 namespace AuthService.Domain.Entities.User;
 
 /// <summary>
-/// Represents a Role for classifying users (e.g., Admin, Manager, Customer).
-/// Roles are typically tied to job function or high-level access categories.
+/// Represents a Group for organizing users and permissions.
+/// Groups are the primary way to bundle permissions and users.
 /// </summary>
-public class Role : BaseEntity
+public class AuthGroup : BaseEntity
 {
     public string Name { get; private set; }
     public string Description { get; private set; }
@@ -17,26 +17,26 @@ public class Role : BaseEntity
     /// <summary>
     /// For Dapper reconstitution
     /// </summary>
-    private Role() { }
+    private AuthGroup() { }
 
-    public Role(Guid id, string name, string description) : base(id)
+    public AuthGroup(Guid id, string name, string description) : base(id)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Role name cannot be empty.", nameof(name));
+            throw new ArgumentException("Group name cannot be empty.", nameof(name));
 
         Name = name;
         Description = description ?? string.Empty;
     }
 
-    public static Role Create(string name, string description)
+    public static AuthGroup Create(string name, string description)
     {
-        return new Role(Guid.NewGuid(), name, description);
+        return new AuthGroup(Guid.NewGuid(), name, description);
     }
 
     public void UpdateDetails(string name, string description)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Role name cannot be empty.", nameof(name));
+            throw new ArgumentException("Group name cannot be empty.", nameof(name));
 
         Name = name;
         Description = description ?? string.Empty;

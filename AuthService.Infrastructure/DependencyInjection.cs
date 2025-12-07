@@ -62,6 +62,12 @@ public static class DependencyInjection
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 
+        // Register role and group repositories
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+        services.AddScoped<IUserGroupRepository, UserGroupRepository>();
+
         return services;
     }
 }
