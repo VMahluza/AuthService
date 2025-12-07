@@ -1,4 +1,6 @@
-POST https://localhost:7297/api/auth/register
+
+@host = http://localhost:5102
+POST {{host}}/api/auth/register
 Content-Type: application/json
 
 {

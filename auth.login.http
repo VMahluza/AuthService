@@ -1,9 +1,10 @@
 # Note: The login endpoint is not yet implemented in the AuthController.
 # Assuming a typical login endpoint, it might look like this:
-POST https://localhost:7297//api/auth/login
+@host = http://localhost:5102
+POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "test@example.com",
+    "email": "VMahluza",
     "password": "password123"
 }

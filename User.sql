@@ -1,4 +1,6 @@
-CREATE TABLE Users (
+USE authservice_db;
+
+CREATE TABLE IF NOT EXISTS Users (
     Id CHAR(36) PRIMARY KEY,
     UserName VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
@@ -8,3 +10,4 @@ CREATE TABLE Users (
     CreatedAt DATETIME NOT NULL,
     LastUpdatedAt DATETIME NULL
 );
+

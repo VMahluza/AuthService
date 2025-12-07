@@ -2,15 +2,34 @@
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
   </Folder>
+  <Folder Name="/Solution Items/documentation/">
+    <File Path="documentation/AuthenticationService.drawio" />
+    <File Path="documentation/Designing a Domain-Driven Authentication Service with .NET 10, Dapper, and JWT.pdf" />
+    <File Path="documentation/Guide to Key Architecture and Design Diagrams for a DDD‑Based Authentication Service.pdf" />
+    <File Path="documentation/User Requirements Specification – Authentication and Identity Management Service.pdf" />
+  </Folder>
   <Folder Name="/Solution Items/http/">
     <File Path="auth.login.http" />
     <File Path="auth.register.http" />
   </Folder>
+  <Folder Name="/Solution Items/initdb/">
+    <File Path="02_Tokens.sql" />
+    <File Path="04_UserSessions.sql" />
+    <File Path="05_apply_indexes.sql" />
+    <File Path="06_ExpiredToken_OldSessions_Audits_CleanUp.sql" />
+    <File Path="initdb/01_Users.sql" />
+    <File Path="initdb/03_AuditLogs.sql" />
+  </Folder>
+  <Folder Name="/Solution Items/Scripts/" />
   <Folder Name="/Solution Items/SQL/">
+    <File Path="AuditLogs.sql" />
+    <File Path="EmailVerificationToken.sql" />
     <File Path="User.sql" />
   </Folder>
   <Project Path="AuthService.API/AuthService.API.csproj" Id="a584ceb1-1a06-480d-a108-fce5b917ffb4" />
   <Project Path="AuthService.Application/AuthService.Application.csproj" />
   <Project Path="AuthService.Domain/AuthService.Domain.csproj" />
   <Project Path="AuthService.Infrastructure/AuthService.Infrastructure.csproj" Id="3fd105e5-ed8a-4f9e-a4fe-d1eae53a3943" />
+  <Project Path="AuthService.PlayGround/AuthService.PlayGround.csproj" Id="272d9de6-35c7-4cb7-8a32-3151146ff5ae" />
+  <Project Path="AuthService.Tests/AuthService.Tests.csproj" Id="17a7bf5d-ff9e-4845-8a4d-9a59ea55382e" />
 </Solution>
