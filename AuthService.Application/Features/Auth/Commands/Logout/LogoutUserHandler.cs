@@ -20,7 +20,6 @@ public class LogoutUserHandler : IRequestHandler<LogoutUserCommand, LogoutUserRe
     public async Task<LogoutUserResult> Handle(LogoutUserCommand request, CancellationToken cancellationToken)
     {
         var userSession = await GetActiveSession(request.JwtToken);
-    
         return 
             request.RevokeAllSessions ? await RemoveAllUserSessions(userSession.UserId) : 
             await RemoveSession(userSession)

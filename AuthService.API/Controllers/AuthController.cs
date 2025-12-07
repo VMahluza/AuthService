@@ -5,6 +5,7 @@ using AuthService.Application.Features.Auth.Commands.Register;
 using AuthService.Application.Features.Auth.Commands.VerifyEmail;
 using AuthService.Application.Features.Auth.Queries.GetAuditLogsByUser;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -113,7 +114,7 @@ public class AuthController : ControllerBase
                 "Internal Server Error");
         }
     }
-
+    [Authorize]
     [HttpGet("audit-logs/{userId:guid}")]
     public async Task<IActionResult> GetAuditLogsByUser(
         Guid userId,

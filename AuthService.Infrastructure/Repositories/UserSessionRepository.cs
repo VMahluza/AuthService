@@ -6,7 +6,6 @@ using Dapper;
 using System.Reflection;
 using System.Text;
 using static Dapper.SqlMapper;
-
 namespace AuthService.Infrastructure.Repositories;
 
 public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRepository
