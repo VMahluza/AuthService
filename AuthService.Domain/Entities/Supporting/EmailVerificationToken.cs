@@ -51,20 +51,4 @@ public class EmailVerificationToken : BaseEntity
         UsedAt = DateTime.UtcNow;
     }
 
-
-    /// <summary>
-    /// Generates a secure random token
-    /// </summary>
-    /// <returns>A secure random token as a string.</returns>
-    private string GenerateSecureToken()
-    {
-        using var rng = RandomNumberGenerator.Create();
-        var randomBytes = new byte[32];
-        rng.GetBytes(randomBytes);
-        return Convert.ToBase64String(randomBytes)
-            .Replace("+", "-")
-            .Replace("/", "_")
-            .TrimEnd('='); ;
-    }
-
 }
