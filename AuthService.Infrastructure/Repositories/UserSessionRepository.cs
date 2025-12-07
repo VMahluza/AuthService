@@ -28,10 +28,10 @@ public class UserSessionRepository : BaseRepository<UserSession>, IUserSessionRe
             entity.Id,
             entity.UserId,
             entity.JwtToken,
-            IssuedAt = DateTime.UtcNow,
+            IssuedAt = entity.IssuedAt,
             entity.ExpiresAt,
             entity.RevokedAt,
-            CreatedAt = DateTime.Now,
+            CreatedAt = entity.CreatedAt,
             entity.LastUpdatedAt
         };
         

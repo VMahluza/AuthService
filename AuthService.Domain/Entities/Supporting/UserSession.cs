@@ -25,8 +25,9 @@ public class UserSession : BaseEntity
     private UserSession() { }
 
     public UserSession(Guid id, Guid userId, AuthenticationResult authenticationResult, DateTime expiresAt)
+        : base(id)  // ✅ Add this to call BaseEntity constructor
     {
-        Id = id;
+        // Remove: Id = id;  // Already set by base(id)
         UserId = userId;
         JwtToken = authenticationResult.AccessToken;
         IssuedAt = DateTime.UtcNow;
@@ -37,17 +38,12 @@ public class UserSession : BaseEntity
 
     public static UserSession Create(Guid userId, AuthenticationResult authenticationResult, DateTime expiresAt)
     {
-
-       
-        return new UserSession
-        {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            JwtToken = authenticationResult.AccessToken,
-            IssuedAt = DateTime.UtcNow,
-            ExpiresAt = expiresAt,
-            RevokedAt = null
-          };
+        return new UserSession(
+            Guid.NewGuid(),
+            userId,
+            authenticationResult,
+            expiresAt
+        );
     }
 
     public void Revoke()
@@ -60,7 +56,6 @@ public class UserSession : BaseEntity
 
     public bool IsActiveSession()
     {
-
         return RevokedAt == null && DateTime.UtcNow < ExpiresAt;
     }
 }
