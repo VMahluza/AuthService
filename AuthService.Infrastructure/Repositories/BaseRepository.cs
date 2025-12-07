@@ -27,7 +27,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new
         {
-            Id = entity.Id.ToString(),
+            Id = entity.Id,
             CreatedAt = entity.CreatedAt,
             LastUpdatedAt = entity.LastUpdatedAt
         });
@@ -43,7 +43,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new
         {
-            Id = entity.Id.ToString(),
+            Id = entity.Id,
             LastUpdatedAt = DateTime.UtcNow
         });
     }
@@ -53,7 +53,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         var sql = $"DELETE FROM {_tableName} WHERE Id = @Id";
 
         using var connection = _connectionFactory.CreateConnection();
-        await connection.ExecuteAsync(sql, new { Id = entity.Id.ToString() });
+        await connection.ExecuteAsync(sql, new { Id = entity.Id });
     }
 
     public virtual async Task<T> GetByIdAsync(Guid id)
@@ -61,7 +61,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
         var sql = $"SELECT * FROM {_tableName} WHERE Id = @Id";
 
         using var connection = _connectionFactory.CreateConnection();
-        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { Id = id.ToString() });
+        var result = await connection.QuerySingleOrDefaultAsync<dynamic>(sql, new { Id = id });
         return result != null ? MapToEntity(result) : default;
     }
 
