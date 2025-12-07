@@ -8,7 +8,7 @@ namespace AuthService.Infrastructure.Repositories;
 public abstract class BaseRepository<T> : IRepository<T> where T : BaseEntity
 {
     protected readonly IAuthConnectionFactory _connectionFactory;
-    protected readonly string _tableName;
+    protected virtual string _tableName { get; set; }
 
     protected BaseRepository(IAuthConnectionFactory connectionFactory)
     {

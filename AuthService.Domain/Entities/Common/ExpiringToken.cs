@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AuthService.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,6 +12,7 @@ public abstract class ExpiringToken : BaseEntity
 {
     public Guid UserId { get; private set; }
     public string Token { get; private set; }
+    public TokenType TokenType { get; private set; }
     public DateTime ExpiresAt { get; private set; }
     public DateTime? UsedAt { get; private set; }
 
@@ -23,12 +25,14 @@ public abstract class ExpiringToken : BaseEntity
         Guid id,
         Guid userId,
         string token,
+        TokenType tokenType,
         DateTime expiresAt,
         DateTime? usedAt)
         : base(id)
     {
         UserId = userId;
         Token = token;
+        TokenType = tokenType;
         ExpiresAt = expiresAt;
         UsedAt = usedAt;
     }

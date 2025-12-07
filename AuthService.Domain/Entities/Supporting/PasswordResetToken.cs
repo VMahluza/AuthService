@@ -1,4 +1,5 @@
 ﻿using AuthService.Domain.Entities.Common;
+using AuthService.Domain.Enums;
 
 namespace AuthService.Domain.Entities.Supporting;
 
@@ -18,7 +19,7 @@ public class PasswordResetToken : ExpiringToken
         string token,
         DateTime expiresAt,
         DateTime? usedAt)
-        : base(id, userId, token, expiresAt, usedAt)
+        : base(id, userId, token, TokenType.PasswordReset,  expiresAt, usedAt)
     {
     }
 }

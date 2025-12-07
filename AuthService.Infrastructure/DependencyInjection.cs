@@ -2,7 +2,9 @@
 using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Domain.Interfaces.Services;
 using AuthService.Domain.Settings;
-using AuthService.Infrastructure.Database;  // Add this for IAuthConnectionFactory and AuthConnectionFactory
+using AuthService.Domain.Entities.Supporting;
+using AuthService.Domain.Enums;
+using AuthService.Infrastructure.Database;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
@@ -13,13 +15,11 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace AuthService.Infrastructure;
-// nx todo research 
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-
         string connectionString = configuration.GetConnectionString("Default");
         services.AddSingleton<IAuthConnectionFactory>(provider =>
             new AuthConnectionFactory(connectionString));
@@ -37,8 +37,7 @@ public static class DependencyInjection
                 !string.IsNullOrEmpty(options.Audience) &&
                 options.ExpiryMinutes > 0,
                 "JWT Settings failed validation"
-                );
-
+            );
 
         // Register services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -50,10 +49,18 @@ public static class DependencyInjection
 
         // Register repositories
         services.AddScoped<IUserRepository, UserRepository>();
+        
+        // Register token repositories with specialized implementations
         services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
+        services.AddScoped<ITokenRepository<EmailVerificationToken>>(provider =>
+            provider.GetRequiredService<IEmailVerificationTokenRepository>());
+        
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<ITokenRepository<PasswordResetToken>>(provider =>
+            provider.GetRequiredService<IPasswordResetTokenRepository>());
+
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
-
 
         return services;
     }
