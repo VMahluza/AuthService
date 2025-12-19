@@ -82,7 +82,8 @@ public class LoginUserCommandHandler :
             user.Id,
             user.UserName,
             user.Email.Value,
-            token.AccessToken
+            token.AccessToken,
+            token.RefreshToken
             );
     }
 
