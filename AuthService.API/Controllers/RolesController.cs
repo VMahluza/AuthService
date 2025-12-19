@@ -73,7 +73,9 @@ public class RolesController : ControllerBase
     /// Create a new role (Admin only)
     /// </summary>
     [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.RequireAdminRole)]
+    [Authorize(Policy = AuthorizationPolicies.RequireSuperAdminRole)]
+    [Authorize(Policy = AuthorizationPolicies.RequireSuperAdminRole)]
+
     [ProducesResponseType(typeof(RoleResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

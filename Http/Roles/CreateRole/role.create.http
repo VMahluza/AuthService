@@ -1,5 +1,5 @@
 @host = http://localhost:5102
-@token = YOUR_JWT_TOKEN_HERE
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MGE0MDczZS1hNjI5LTQzZDgtYjM2Ny0zZmJlMjNjZTg2MzkiLCJ1bmlxdWVfbmFtZSI6IlZpY3RvciIsImVtYWlsIjoidmljdG9yQGV4YW1wbGUuY29tIiwianRpIjoiNzQyZWM3MDAtM2U3OC00YTY3LTlmMmUtODIwMjk4Mjk0YWZkIiwiZXhwIjoxNzY2MTU2MzU0LCJpc3MiOiJBdXRoU2VydmljZSIsImF1ZCI6IkF1dGhTZXJ2aWNlIn0.kqoRnuwswnZHwM7_dABq9skJejl2lYAcXApU5CkIUt8
 
 ### Create a new role (Admin only)
 POST {{host}}/api/roles

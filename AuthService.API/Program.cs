@@ -51,28 +51,31 @@ builder.Services.AddAuthentication(options =>
 // Configure Authorization Policies
 builder.Services.AddAuthorization(options =>
 {
-    // Role-based policies
+    // Single role policies
     options.AddPolicy(AuthorizationPolicies.RequireAdminRole, policy =>
         policy.RequireRole("Admin"));
     
+    options.AddPolicy(AuthorizationPolicies.RequireSuperAdminRole, policy =>
+        policy.RequireRole("SuperAdmin"));
+    
     options.AddPolicy(AuthorizationPolicies.RequireManagerRole, policy =>
-        policy.RequireRole("Admin", "Manager"));
+        policy.RequireRole("Manager"));
     
     options.AddPolicy(AuthorizationPolicies.RequireUserRole, policy =>
         policy.RequireAuthenticatedUser());
 
     // Permission-based policies (for future use with claims)
     options.AddPolicy(AuthorizationPolicies.CanManageRoles, policy =>
-        policy.RequireRole("Admin"));
+        policy.RequireRole("Admin", "SuperAdmin"));
     
     options.AddPolicy(AuthorizationPolicies.CanManageGroups, policy =>
-        policy.RequireRole("Admin"));
+        policy.RequireRole("Admin", "SuperAdmin"));
     
     options.AddPolicy(AuthorizationPolicies.CanManageUsers, policy =>
-        policy.RequireRole("Admin", "Manager"));
+        policy.RequireRole("Admin", "Manager", "SuperAdmin"));
     
     options.AddPolicy(AuthorizationPolicies.CanViewAuditLogs, policy =>
-        policy.RequireRole("Admin", "Manager"));
+        policy.RequireRole("Admin", "Manager", "SuperAdmin"));
 });
 
 // Layer registrations

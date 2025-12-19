@@ -7,6 +7,7 @@ public static class AuthorizationPolicies
 {
     // Role-based policies
     public const string RequireAdminRole = "RequireAdminRole";
+    public const string RequireSuperAdminRole = "RequireSuperAdminRole";
     public const string RequireManagerRole = "RequireManagerRole";
     public const string RequireUserRole = "RequireUserRole";
 

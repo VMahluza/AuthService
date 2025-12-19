@@ -1,0 +1,40 @@
+@host = http://localhost:5102
+
+### Create a new permission (Admin only)
+# @name createPermission
+POST {{host}}/api/permissions
+Content-Type: application/json
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+{
+    "key": "MANAGE_USERS",
+    "name": "Manage Users",
+    "description": "Allows full management of user accounts including creation, editing, and deletion"
+}
+
+###
+@permissionId = {{createPermission.response.body.permissionId}}
+
+### Assign permission to a group (Admin only)
+POST {{host}}/api/permissions/assign
+Content-Type: application/json
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+{
+    "groupId": "YOUR_GROUP_ID_HERE",
+    "permissionId": "{{permissionId}}"
+}
+
+### Revoke permission from a group (Admin only)
+DELETE {{host}}/api/permissions/revoke
+Content-Type: application/json
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+{
+    "groupId": "YOUR_GROUP_ID_HERE",
+    "permissionId": "{{permissionId}}"
+}
+
+### Get user's effective permissions
+GET {{host}}/api/permissions/users/YOUR_USER_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE

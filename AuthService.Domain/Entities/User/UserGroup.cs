@@ -1,3 +1,4 @@
+using AuthService.Domain.Entities.Common;
 using System;
 
 namespace AuthService.Domain.Entities.User;
@@ -5,7 +6,7 @@ namespace AuthService.Domain.Entities.User;
 /// <summary>
 /// Join table for User-Group many-to-many relationship
 /// </summary>
-public class UserGroup
+public class UserGroup : BaseEntity
 {
     public Guid UserId { get; private set; }
     public Guid GroupId { get; private set; }
@@ -17,7 +18,7 @@ public class UserGroup
     /// </summary>
     private UserGroup() { }
 
-    public UserGroup(Guid userId, Guid groupId, Guid? assignedBy = null)
+    public UserGroup(Guid id, Guid userId, Guid groupId, Guid? assignedBy = null) : base(id)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("UserId cannot be empty.", nameof(userId));
@@ -28,5 +29,10 @@ public class UserGroup
         GroupId = groupId;
         AssignedAt = DateTime.UtcNow;
         AssignedBy = assignedBy;
+    }
+
+    public static UserGroup Create(Guid userId, Guid groupId, Guid? assignedBy = null)
+    {
+        return new UserGroup(Guid.NewGuid(), userId, groupId, assignedBy);
     }
 }

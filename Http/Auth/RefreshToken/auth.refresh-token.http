@@ -1,9 +1,15 @@
 @host = http://localhost:5102
 
 ### Refresh Access Token
+# @name refreshToken
 POST {{host}}/api/auth/refresh
 Content-Type: application/json
 
 {
     "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
 }
+
+###
+# After refresh, you can capture the new tokens:
+@newAccessToken = {{refreshToken.response.body.accessToken}}
+@newRefreshToken = {{refreshToken.response.body.refreshToken}}

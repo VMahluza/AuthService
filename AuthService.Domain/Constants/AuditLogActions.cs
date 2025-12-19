@@ -34,4 +34,11 @@ public static class AuditLogActions
     public const string GroupDeleted = "GROUP_DELETED";
     public const string UserAddedToGroup = "USER_ADDED_TO_GROUP";
     public const string UserRemovedFromGroup = "USER_REMOVED_FROM_GROUP";
+
+    // Permission Management
+    public const string PermissionCreated = "PERMISSION_CREATED";
+    public const string PermissionUpdated = "PERMISSION_UPDATED";
+    public const string PermissionDeleted = "PERMISSION_DELETED";
+    public const string PermissionAssigned = "PERMISSION_ASSIGNED_TO_GROUP";
+    public const string PermissionRevoked = "PERMISSION_REVOKED_FROM_GROUP";
 }
