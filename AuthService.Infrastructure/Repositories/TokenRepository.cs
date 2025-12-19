@@ -4,6 +4,7 @@ using AuthService.Domain.Enums;
 using AuthService.Domain.Interfaces.Repositories;
 using AuthService.Infrastructure.Database;
 using Dapper;
+using MySqlConnector;
 using System.Reflection;
 
 namespace AuthService.Infrastructure.Repositories;
@@ -22,22 +23,34 @@ public class TokenRepository<T> : BaseRepository<T>, ITokenRepository<T>
 
     public override async Task AddAsync(T entity)
     {
-        var sql = @"
+
+        try
+        {
+
+
+            var sql = @"
             INSERT INTO Tokens (Id, UserId, Token, TokenType, ExpiresAt, UsedAt, CreatedAt, LastUpdatedAt)
             VALUES (@Id, @UserId, @Token, @TokenType, @ExpiresAt, @UsedAt, @CreatedAt, @LastUpdatedAt)";
 
-        using var connection = _connectionFactory.CreateConnection();
-        await connection.ExecuteAsync(sql, new
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                Id = entity.Id,
+                UserId = entity.UserId,
+                Token = entity.Token,
+                TokenType = entity.TokenType.ToString(),
+                ExpiresAt = entity.ExpiresAt,
+                UsedAt = entity.UsedAt,
+                CreatedAt = entity.CreatedAt,
+                LastUpdatedAt = entity.LastUpdatedAt
+            });
+        }
+        catch (MySqlException ex)
         {
-            Id = entity.Id,
-            UserId = entity.UserId,
-            Token = entity.Token,
-            TokenType = entity.TokenType.ToString(),
-            ExpiresAt = entity.ExpiresAt,
-            UsedAt = entity.UsedAt,
-            CreatedAt = entity.CreatedAt,
-            LastUpdatedAt = entity.LastUpdatedAt
-        });
+
+            throw new Exception($"Failed At Token Repo:{ex.Message}" );
+        
+        }
     }
 
     public override async Task UpdateAsync(T entity)
