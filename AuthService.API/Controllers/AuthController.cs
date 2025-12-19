@@ -2,6 +2,7 @@
 using AuthService.Application.Features.Auth.Commands.ForgotPassword;
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Logout;
+using AuthService.Application.Features.Auth.Commands.RefreshToken;
 using AuthService.Application.Features.Auth.Commands.Register;
 using AuthService.Application.Features.Auth.Commands.ResetPassword;
 using AuthService.Application.Features.Auth.Commands.VerifyEmail;
@@ -200,6 +201,33 @@ public class AuthController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 new ResetPasswordResult(false, "An error occurred while resetting your password.")
             );
+        }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        try
+        {
+            var command = new RefreshTokenCommand(request.RefreshToken);
+            var result = await _mediator.Send(command);
+            
+            return Ok(new RefreshTokenResponse(
+                result.AccessToken,
+                result.RefreshToken,
+                result.ExpiresAt));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("Token refresh failed: {Message}", ex.Message);
+            return Unauthorized(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during token refresh");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new { error = "An error occurred while refreshing the token" });
         }
     }
 

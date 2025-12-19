@@ -1,6 +1,7 @@
 using MySqlConnector;
 using AuthService.Infrastructure;
 using AuthService.Application;  // Add this for AddApplication
+using AuthService.API.Middleware;
 using AuthService.Domain.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -19,6 +20,14 @@ builder.Services.AddSwaggerGen();  // Added for Swagger UI
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["Secret"];
 
+// Validate JWT secret key minimum length (32 characters for HS256)
+if (string.IsNullOrEmpty(secretKey) || secretKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "JWT Secret key must be at least 32 characters long. " +
+        "Please set a secure key via environment variable or user secrets.");
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,6 +41,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.FromMinutes(5), // Reduce clock skew tolerance
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
@@ -81,8 +91,26 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Add Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    
+    if (!app.Environment.IsDevelopment())
+    {
+        context.Response.Headers.Append("Strict-Transport-Security", 
+            "max-age=31536000; includeSubDomains");
+    }
+    
+    await next();
+});
+
 // Add Authentication & Authorization middleware
 app.UseAuthentication();
+app.UseMiddleware<JwtRevocationMiddleware>(); // Validate tokens against session database
 app.UseAuthorization();
 
 app.MapControllers();

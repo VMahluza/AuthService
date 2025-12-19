@@ -59,6 +59,10 @@ public static class DependencyInjection
         services.AddScoped<ITokenRepository<PasswordResetToken>>(provider =>
             provider.GetRequiredService<IPasswordResetTokenRepository>());
 
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<ITokenRepository<RefreshToken>>(provider =>
+            provider.GetRequiredService<IRefreshTokenRepository>());
+
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
 

@@ -25,6 +25,8 @@ public class LoginUserCommandHandler :
     private readonly IUserRepository _userRepository;
     private readonly IUserSessionRepository _userSessionRepository;
     private readonly IAuditLogRepository _auditLogRepository;
+    private readonly IUserRoleRepository _userRoleRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
@@ -38,6 +40,8 @@ public class LoginUserCommandHandler :
         IJwtTokenGenerator jwtTokenGenerator,
         IUserSessionRepository userSessionRepository,
         IAuditLogRepository auditLogRepository,
+        IUserRoleRepository userRoleRepository,
+        IRefreshTokenRepository refreshTokenRepository,
         IOptions<SecuritySettingsOptions> securitySettingsOptions,
         ILogger<LoginUserCommandHandler> logger,
         IServerAddress serverAddress
@@ -48,6 +52,8 @@ public class LoginUserCommandHandler :
         _jwtTokenGenerator = jwtTokenGenerator;
         _userSessionRepository = userSessionRepository;
         _auditLogRepository = auditLogRepository;
+        _userRoleRepository = userRoleRepository;
+        _refreshTokenRepository = refreshTokenRepository;
         _securitySettings = securitySettingsOptions.Value;
         _logger = logger;
         _serverAddress = serverAddress;
@@ -83,10 +89,27 @@ public class LoginUserCommandHandler :
     private async Task<AuthenticationResult> CreateSession(User user)
     {
         await EnforceConcurrentSessionPolicyAsync(user.Id);
-        AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(user.Id, user.UserName, user.Email.Value);
+        
+        // Fetch user roles for JWT claims
+        var userRoles = await _userRoleRepository.GetRolesByUserIdAsync(user.Id);
+        var roleNames = userRoles.Select(r => r.Name).ToList();
+        
+        AuthenticationResult token = await _jwtTokenGenerator.GenerateToken(
+            user.Id, 
+            user.UserName, 
+            user.Email.Value,
+            roleNames);
+        
+        // Store refresh token with 30-day expiration
+        var refreshToken = Domain.Entities.Supporting.RefreshToken.Create(
+            user.Id,
+            token.RefreshToken,
+            DateTime.UtcNow.AddDays(30));
+        await _refreshTokenRepository.AddAsync(refreshToken);
+        
         var userSession = UserSession.Create(user.Id, token, token.ExpiresAt);
-
         await _userSessionRepository.AddAsync(userSession);
+        
         return token;
     }
 
