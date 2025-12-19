@@ -18,4 +18,10 @@
     <ProjectReference Include="..\AuthService.Infrastructure\AuthService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Include HTTP test files in Solution Explorer -->
+    <None Include="..\Http\**\*.http" Link="Http\%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\Http\README.md" Link="Http\README.md" />
+  </ItemGroup>
+
 </Project>
