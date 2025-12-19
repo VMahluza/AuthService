@@ -13,11 +13,11 @@
     <File Path="auth.register.http" />
   </Folder>
   <Folder Name="/Solution Items/initdb/">
-    <File Path="02_Tokens.sql" />
     <File Path="04_UserSessions.sql" />
     <File Path="05_apply_indexes.sql" />
     <File Path="06_ExpiredToken_OldSessions_Audits_CleanUp.sql" />
     <File Path="initdb/01_Users.sql" />
+    <File Path="initdb/02_Tokens.sql" />
     <File Path="initdb/03_AuditLogs.sql" />
   </Folder>
   <Folder Name="/Solution Items/Scripts/" />

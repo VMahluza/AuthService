@@ -36,6 +36,7 @@
   <ItemGroup>
     <Folder Include="Repositories\" />
     <Folder Include="NewFolder\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

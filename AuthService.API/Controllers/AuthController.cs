@@ -1,7 +1,15 @@
-﻿using AuthService.API.Contracts;
+﻿using AuthService.API.Contracts.Auth.Login;
+using AuthService.API.Contracts.Auth.Logout;
+using AuthService.API.Contracts.Auth.Password;
+using AuthService.API.Contracts.Auth.RefreshToken;
+using AuthService.API.Contracts.Auth.Register;
+using AuthService.API.Contracts.Auth.Varify;
+using AuthService.Application.Features.Auth.Commands.ForgotPassword;
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Logout;
+using AuthService.Application.Features.Auth.Commands.RefreshToken;
 using AuthService.Application.Features.Auth.Commands.Register;
+using AuthService.Application.Features.Auth.Commands.ResetPassword;
 using AuthService.Application.Features.Auth.Commands.VerifyEmail;
 using AuthService.Application.Features.Auth.Queries.GetAuditLogsByUser;
 using MediatR;
@@ -163,6 +171,69 @@ public class AuthController : ControllerBase
             return BadRequest(result);
         }
   
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var command = new ForgotPasswordCommand(request.Email);
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        try
+        {
+            var command = new ResetPasswordCommand(
+                Token: request.Token,
+                NewPassword: request.NewPassword
+            );
+
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning("Password reset failed: {Message}", ex.Message);
+            return BadRequest(new ResetPasswordResult(false, ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during password reset");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ResetPasswordResult(false, "An error occurred while resetting your password.")
+            );
+        }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        try
+        {
+            var command = new RefreshTokenCommand(request.RefreshToken);
+            var result = await _mediator.Send(command);
+            
+            return Ok(new RefreshTokenResponse(
+                result.AccessToken,
+                result.RefreshToken,
+                result.ExpiresAt));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning("Token refresh failed: {Message}", ex.Message);
+            return Unauthorized(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during token refresh");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new { error = "An error occurred while refreshing the token" });
+        }
     }
 
 }

@@ -53,4 +53,20 @@ public class User : BaseEntity
     {
         Status = UserStatus.Locked;
     }
+
+    public void ResetPassword(PasswordHash newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+        FailedLoginAttempts = 0; // Reset failed attempts on password reset
+        LastUpdatedAt = DateTime.UtcNow;
+    }
+
+    public void VerifyEmail()
+    {
+        if (Status == UserStatus.PendingVerification)
+        {
+            Status = UserStatus.Active;
+            LastUpdatedAt = DateTime.UtcNow;
+        }
+    }
 }

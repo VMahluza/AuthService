@@ -1,0 +1,13 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@roleId = YOUR_ROLE_ID_HERE
+
+### Delete a role (Admin only)
+DELETE {{host}}/api/roles/{{roleId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Example with actual GUID
+DELETE {{host}}/api/roles/123e4567-e89b-12d3-a456-426614174001
+Authorization: Bearer {{token}}

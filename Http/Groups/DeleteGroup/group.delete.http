@@ -1,0 +1,13 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@groupId = YOUR_GROUP_ID_HERE
+
+### Delete a group (Admin only)
+DELETE {{host}}/api/groups/{{groupId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Example with actual GUID
+DELETE {{host}}/api/groups/223e4567-e89b-12d3-a456-426614174000
+Authorization: Bearer {{token}}

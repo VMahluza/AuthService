@@ -1,0 +1,12 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+
+### Get all groups (paginated)
+GET {{host}}/api/groups?pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+###
+
+### Get all groups (first page, default page size)
+GET {{host}}/api/groups
+Authorization: Bearer {{token}}

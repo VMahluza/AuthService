@@ -1,0 +1,26 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@userId = YOUR_USER_ID_HERE
+@roleId = YOUR_ROLE_ID_HERE
+
+### Assign a role to a user (Admin only)
+POST {{host}}/api/roles/assign
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "userId": "{{userId}}",
+    "roleId": "{{roleId}}"
+}
+
+###
+
+# Example with actual GUIDs
+POST {{host}}/api/roles/assign
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "roleId": "123e4567-e89b-12d3-a456-426614174001"
+}

@@ -22,25 +22,27 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _refreshTokenGenerator = refreshTokenGenerator;
     }
 
-    public async Task<AuthenticationResult> GenerateToken(Guid userId, string userName, string email)
+    public async Task<AuthenticationResult> GenerateToken(Guid userId, string userName, string email, IEnumerable<string> roles)
     {
-
-        // TODO: Need to return AuthenticationResult including refresh token
-
-
-        var claims = new[]
+        var jti = Guid.NewGuid().ToString();
+        
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.UniqueName, userName),
             new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, jti)
         };
+
+        // Add role claims for authorization
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
-
-        var utc = DateTime.UtcNow;
 
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
@@ -56,7 +58,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         return new AuthenticationResult(
             AccessToken: accessToken,
             RefreshToken: refreshToken,
-            Jti: Guid.NewGuid().ToString(),
+            Jti: jti,
             ExpiresAt: expiresAt
         );
     }

@@ -32,4 +32,4 @@ CREATE TABLE IF NOT EXISTS Tokens (
 -- Add check constraint for TokenType enum values (MySQL 8.0.16+)
 ALTER TABLE Tokens 
     ADD CONSTRAINT CHK_Tokens_TokenType 
-    CHECK (TokenType IN ('EmailVerification', 'PasswordReset'));
+    CHECK (TokenType IN ('EmailVerification', 'PasswordReset', 'RefreshToken'));

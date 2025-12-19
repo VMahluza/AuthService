@@ -1,0 +1,13 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@groupId = YOUR_GROUP_ID_HERE
+
+### Get all users in a specific group
+GET {{host}}/api/groups/{{groupId}}/users
+Authorization: Bearer {{token}}
+
+###
+
+# Example with actual GUID
+GET {{host}}/api/groups/223e4567-e89b-12d3-a456-426614174000/users
+Authorization: Bearer {{token}}

@@ -1,0 +1,12 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+
+### Create a new role (Admin only)
+POST {{host}}/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Manager",
+    "description": "Manager role with elevated permissions"
+}

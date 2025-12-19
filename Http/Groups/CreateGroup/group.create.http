@@ -1,0 +1,12 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+
+### Create a new group (Admin only)
+POST {{host}}/api/groups
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Engineering Team",
+    "description": "Software engineering department group"
+}

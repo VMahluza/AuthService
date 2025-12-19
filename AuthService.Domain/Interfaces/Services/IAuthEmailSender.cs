@@ -8,4 +8,5 @@ public interface IAuthEmailSender
 {
     Task SendVarificationEmailAsync(User user, string token);
     Task SendEmailVerificationSuccessAsync(User user);
+    Task SendPasswordResetEmailAsync(User user, string token);
 }

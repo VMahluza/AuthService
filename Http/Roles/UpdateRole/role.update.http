@@ -1,0 +1,13 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@roleId = YOUR_ROLE_ID_HERE
+
+### Update an existing role (Admin only)
+PUT {{host}}/api/roles/{{roleId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Senior Manager",
+    "description": "Updated description for manager role"
+}

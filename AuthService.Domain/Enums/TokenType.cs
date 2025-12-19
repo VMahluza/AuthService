@@ -3,5 +3,6 @@ namespace AuthService.Domain.Enums;
 public enum TokenType
 {
     EmailVerification,
-    PasswordReset
+    PasswordReset,
+    RefreshToken
 }
