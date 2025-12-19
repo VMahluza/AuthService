@@ -72,6 +72,10 @@ public static class DependencyInjection
         services.AddScoped<IUserRoleRepository, UserRoleRepository>();
         services.AddScoped<IUserGroupRepository, UserGroupRepository>();
 
+        // Register permission repositories
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IGroupPermissionRepository, GroupPermissionRepository>();
+
         return services;
     }
 }
