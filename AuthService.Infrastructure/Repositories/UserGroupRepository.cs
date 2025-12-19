@@ -21,16 +21,19 @@ public class UserGroupRepository : IUserGroupRepository
     public async Task AddAsync(UserGroup userGroup)
     {
         var sql = $@"
-            INSERT INTO {TableName} (UserId, GroupId, AssignedAt, AssignedBy)
-            VALUES (@UserId, @GroupId, @AssignedAt, @AssignedBy)";
+            INSERT INTO {TableName} (Id, UserId, GroupId, JoinedAt, AssignedBy, CreatedAt, LastUpdatedAt)
+            VALUES (@Id, @UserId, @GroupId, @JoinedAt, @AssignedBy, @CreatedAt, @LastUpdatedAt)";
 
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new
         {
+            Id = userGroup.Id,
             UserId = userGroup.UserId,
             GroupId = userGroup.GroupId,
-            AssignedAt = userGroup.AssignedAt,
-            AssignedBy = userGroup.AssignedBy
+            JoinedAt = userGroup.AssignedAt,
+            AssignedBy = userGroup.AssignedBy,
+            CreatedAt = userGroup.CreatedAt,
+            LastUpdatedAt = userGroup.LastUpdatedAt
         });
     }
 

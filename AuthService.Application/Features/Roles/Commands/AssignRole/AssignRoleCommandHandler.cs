@@ -58,7 +58,8 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, Assig
         }
 
         // Assign role to user
-        var userRole = new UserRole(request.UserId, request.RoleId);
+       
+        var userRole = UserRole.Create(request.UserId, request.RoleId);
         await _userRoleRepository.AddAsync(userRole);
 
         // Log the assignment

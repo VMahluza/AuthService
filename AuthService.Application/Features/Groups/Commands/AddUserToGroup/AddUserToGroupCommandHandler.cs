@@ -58,7 +58,7 @@ public class AddUserToGroupCommandHandler : IRequestHandler<AddUserToGroupComman
         }
 
         // Add user to group
-        var userGroup = new UserGroup(request.UserId, request.GroupId);
+        var userGroup = UserGroup.Create(request.UserId, request.GroupId);
         await _userGroupRepository.AddAsync(userGroup);
 
         // Log the addition

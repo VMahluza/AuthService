@@ -21,16 +21,19 @@ public class UserRoleRepository : IUserRoleRepository
     public async Task AddAsync(UserRole userRole)
     {
         var sql = $@"
-            INSERT INTO {TableName} (UserId, RoleId, AssignedAt, AssignedBy)
-            VALUES (@UserId, @RoleId, @AssignedAt, @AssignedBy)";
+            INSERT INTO {TableName} (Id, UserId, RoleId, AssignedAt, AssignedBy, CreatedAt, LastUpdatedAt)
+            VALUES (@Id, @UserId, @RoleId, @AssignedAt, @AssignedBy, @CreatedAt, @LastUpdatedAt)";
 
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new
         {
+            Id = userRole.Id,
             UserId = userRole.UserId,
             RoleId = userRole.RoleId,
             AssignedAt = userRole.AssignedAt,
-            AssignedBy = userRole.AssignedBy
+            AssignedBy = userRole.AssignedBy,
+            CreatedAt = userRole.CreatedAt,
+            LastUpdatedAt = userRole.LastUpdatedAt
         });
     }
 

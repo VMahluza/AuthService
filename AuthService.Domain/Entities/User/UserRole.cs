@@ -1,3 +1,4 @@
+using AuthService.Domain.Entities.Common;
 using System;
 
 namespace AuthService.Domain.Entities.User;
@@ -5,7 +6,7 @@ namespace AuthService.Domain.Entities.User;
 /// <summary>
 /// Join table for User-Role many-to-many relationship
 /// </summary>
-public class UserRole
+public class UserRole : BaseEntity
 {
     public Guid UserId { get; private set; }
     public Guid RoleId { get; private set; }
@@ -17,7 +18,7 @@ public class UserRole
     /// </summary>
     private UserRole() { }
 
-    public UserRole(Guid userId, Guid roleId, Guid? assignedBy = null)
+    public UserRole(Guid id, Guid userId, Guid roleId, Guid? assignedBy = null) : base(id)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("UserId cannot be empty.", nameof(userId));
@@ -28,5 +29,10 @@ public class UserRole
         RoleId = roleId;
         AssignedAt = DateTime.UtcNow;
         AssignedBy = assignedBy;
+    }
+
+    public static UserRole Create(Guid userId, Guid roleId, Guid? assignedBy = null)
+    {
+        return new UserRole(Guid.NewGuid(), userId, roleId, assignedBy);
     }
 }
