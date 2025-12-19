@@ -1,0 +1,9 @@
+@host = http://localhost:5102
+
+### Refresh Access Token
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+}

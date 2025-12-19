@@ -1,4 +1,3 @@
-using AuthService.API.Contracts;
 using AuthService.Application.Features.Groups.Commands.AddUserToGroup;
 using AuthService.Application.Features.Groups.Commands.CreateGroup;
 using AuthService.Application.Features.Groups.Commands.DeleteGroup;
@@ -11,6 +10,12 @@ using AuthService.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AuthService.API.Contracts.Common;
+using AuthService.API.Contracts.Groups.AddUserToGroup;
+using AuthService.API.Contracts.Groups.CreateGroup;
+using AuthService.API.Contracts.Groups.UpdateGroup;
+using AuthService.API.Contracts.Groups.GetGroup;
+using AuthService.API.Contracts.Groups.Common;
 
 namespace AuthService.API.Controllers;
 

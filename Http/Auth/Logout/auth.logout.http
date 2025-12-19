@@ -1,0 +1,19 @@
+@host = http://localhost:5102
+
+### Logout (Single Session)
+DELETE {{host}}/api/auth/logout
+Content-Type: application/json
+
+{
+    "jwtToken": "YOUR_JWT_TOKEN_HERE",
+    "revokeAllSessions": false
+}
+
+### Logout (All Sessions)
+DELETE {{host}}/api/auth/logout
+Content-Type: application/json
+
+{
+    "jwtToken": "YOUR_JWT_TOKEN_HERE",
+    "revokeAllSessions": true
+}

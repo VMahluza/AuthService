@@ -1,0 +1,13 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@userId = YOUR_USER_ID_HERE
+
+### Get audit logs for a specific user (requires authentication)
+GET {{host}}/api/auth/audit-logs/{{userId}}?pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+###
+
+# Example with actual GUID
+GET {{host}}/api/auth/audit-logs/123e4567-e89b-12d3-a456-426614174000?pageNumber=1&pageSize=20
+Authorization: Bearer {{token}}

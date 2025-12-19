@@ -1,4 +1,3 @@
-using AuthService.API.Contracts;
 using AuthService.Application.Features.Roles.Commands.AssignRole;
 using AuthService.Application.Features.Roles.Commands.CreateRole;
 using AuthService.Application.Features.Roles.Commands.DeleteRole;
@@ -11,6 +10,12 @@ using AuthService.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AuthService.API.Contracts.Common;
+using AuthService.API.Contracts.Roles.CreateRole;
+using AuthService.API.Contracts.Roles.UpdateRole;
+using AuthService.API.Contracts.Roles.AssignRole;
+using AuthService.API.Contracts.Roles.GetRole;
+using AuthService.API.Contracts.Roles.Common;
 
 namespace AuthService.API.Controllers;
 

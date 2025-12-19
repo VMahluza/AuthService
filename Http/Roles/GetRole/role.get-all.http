@@ -1,0 +1,12 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+
+### Get all roles (paginated)
+GET {{host}}/api/roles?pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+###
+
+### Get all roles (first page, default page size)
+GET {{host}}/api/roles
+Authorization: Bearer {{token}}

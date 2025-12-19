@@ -1,0 +1,4 @@
+@host = http://localhost:5102
+
+### Verify Email
+GET {{host}}/api/auth/verify-email?token=YOUR_VERIFICATION_TOKEN_HERE

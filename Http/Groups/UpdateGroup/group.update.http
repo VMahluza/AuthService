@@ -1,0 +1,13 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@groupId = YOUR_GROUP_ID_HERE
+
+### Update an existing group (Admin only)
+PUT {{host}}/api/groups/{{groupId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Senior Engineering Team",
+    "description": "Updated description for engineering team"
+}

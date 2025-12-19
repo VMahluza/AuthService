@@ -1,4 +1,9 @@
-﻿using AuthService.API.Contracts;
+﻿using AuthService.API.Contracts.Auth.Login;
+using AuthService.API.Contracts.Auth.Logout;
+using AuthService.API.Contracts.Auth.Password;
+using AuthService.API.Contracts.Auth.RefreshToken;
+using AuthService.API.Contracts.Auth.Register;
+using AuthService.API.Contracts.Auth.Varify;
 using AuthService.Application.Features.Auth.Commands.ForgotPassword;
 using AuthService.Application.Features.Auth.Commands.Login;
 using AuthService.Application.Features.Auth.Commands.Logout;

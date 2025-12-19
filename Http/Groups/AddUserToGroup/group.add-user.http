@@ -1,0 +1,26 @@
+@host = http://localhost:5102
+@token = YOUR_JWT_TOKEN_HERE
+@userId = YOUR_USER_ID_HERE
+@groupId = YOUR_GROUP_ID_HERE
+
+### Add a user to a group (Admin only)
+POST {{host}}/api/groups/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "userId": "{{userId}}",
+    "groupId": "{{groupId}}"
+}
+
+###
+
+# Example with actual GUIDs
+POST {{host}}/api/groups/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "groupId": "223e4567-e89b-12d3-a456-426614174000"
+}
