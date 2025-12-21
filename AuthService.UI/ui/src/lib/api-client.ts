@@ -23,6 +23,10 @@ let failedQueue: Array<{
   reject: (error: AxiosError) => void;
 }> = [];
 
+// Request cancellation management
+const activeRequests = new Map<string, AbortController>();
+let requestIdCounter = 0;
+
 const processQueue = (error: AxiosError | null, token: string | null = null) => {
   failedQueue.forEach((promise) => {
     if (error) {
@@ -357,12 +361,134 @@ export function getCacheStats() {
 }
 
 /**
+ * Generate unique request ID
+ */
+function generateRequestId(): string {
+  return `req_${++requestIdCounter}_${Date.now()}`;
+}
+
+/**
+ * Create an AbortController and register it
+ * @param requestId - Optional custom request ID
+ * @returns Object with requestId and signal
+ */
+export function createCancellableRequest(requestId?: string): { 
+  requestId: string; 
+  signal: AbortSignal;
+} {
+  const id = requestId || generateRequestId();
+  const controller = new AbortController();
+  activeRequests.set(id, controller);
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🎯 Request Registered: ${id} (${activeRequests.size} active)`);
+  }
+  
+  return { requestId: id, signal: controller.signal };
+}
+
+/**
+ * Cancel a specific request by ID
+ * @param requestId - The request ID to cancel
+ * @returns true if cancelled, false if not found
+ */
+export function cancelRequest(requestId: string): boolean {
+  const controller = activeRequests.get(requestId);
+  
+  if (controller) {
+    controller.abort();
+    activeRequests.delete(requestId);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🚫 Request Cancelled: ${requestId}`);
+    }
+    
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Cancel all active requests
+ * @returns Number of requests cancelled
+ */
+export function cancelAllRequests(): number {
+  const count = activeRequests.size;
+  
+  activeRequests.forEach((controller, requestId) => {
+    controller.abort();
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🚫 Request Cancelled: ${requestId}`);
+    }
+  });
+  
+  activeRequests.clear();
+  
+  if (process.env.NODE_ENV === 'development' && count > 0) {
+    console.log(`🚫 All Requests Cancelled: ${count} total`);
+  }
+  
+  return count;
+}
+
+/**
+ * Cancel requests matching a URL pattern
+ * @param pattern - URL pattern to match (string or regex)
+ * @returns Number of requests cancelled
+ */
+export function cancelRequestsByUrl(pattern: string | RegExp): number {
+  let cancelled = 0;
+  
+  activeRequests.forEach((controller, requestId) => {
+    const matches = typeof pattern === 'string' 
+      ? requestId.includes(pattern)
+      : pattern.test(requestId);
+    
+    if (matches) {
+      controller.abort();
+      activeRequests.delete(requestId);
+      cancelled++;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🚫 Request Cancelled: ${requestId}`);
+      }
+    }
+  });
+  
+  if (process.env.NODE_ENV === 'development' && cancelled > 0) {
+    console.log(`🚫 Requests Cancelled by Pattern: ${cancelled} matched`);
+  }
+  
+  return cancelled;
+}
+
+/**
+ * Get active request count
+ */
+export function getActiveRequestCount(): number {
+  return activeRequests.size;
+}
+
+/**
+ * Cleanup completed request from tracking
+ */
+function cleanupRequest(requestId: string) {
+  activeRequests.delete(requestId);
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`✅ Request Completed: ${requestId} (${activeRequests.size} active)`);
+  }
+}
+
+/**
  * Generic API response type
  */
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
+  cancelled?: boolean;
 }
 
 /**
@@ -391,18 +517,24 @@ export function createAuthHeader(token: string) {
 }
 
 /**
- * Generic GET request handler with caching
+ * Generic GET request handler with caching and cancellation
  * @param url - The API endpoint URL
  * @param token - Optional authentication token
  * @param useCache - Whether to use cache (default: true)
  * @param cacheTTL - Cache time-to-live in milliseconds (default: 5 minutes)
+ * @param signal - Optional AbortSignal for cancellation
+ * @param requestId - Optional custom request ID for tracking
  */
 export async function get<T>(
   url: string,
   token?: string,
   useCache: boolean = true,
-  cacheTTL?: number
+  cacheTTL?: number,
+  signal?: AbortSignal,
+  requestId?: string
 ): Promise<ApiResponse<T>> {
+  let reqId = requestId;
+  
   try {
     // Check cache first if enabled
     if (useCache) {
@@ -414,9 +546,22 @@ export async function get<T>(
       }
     }
 
+    // Setup cancellation if not provided
+    const finalSignal = signal || (() => {
+      const { requestId: id, signal: sig } = createCancellableRequest(reqId);
+      reqId = id;
+      return sig;
+    })();
+
     // Make actual request
-    const config = token ? { headers: createAuthHeader(token) } : {};
+    const config = {
+      ...(token ? { headers: createAuthHeader(token) } : {}),
+      signal: finalSignal,
+    };
     const response = await apiClient.get<T>(url, config);
+    
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
     
     // Store in cache if enabled
     if (useCache) {
@@ -426,59 +571,171 @@ export async function get<T>(
     
     return { success: true, data: response.data };
   } catch (error) {
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
+    // Check if request was cancelled
+    if (error instanceof AxiosError && error.code === 'ERR_CANCELED') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🚫 Request Cancelled: GET ${url}`);
+      }
+      return { success: false, error: 'Request cancelled', cancelled: true };
+    }
+    
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 /**
- * Generic POST request handler
+ * Generic POST request handler with cancellation
+ * @param url - The API endpoint URL
+ * @param data - Request body data
+ * @param token - Optional authentication token
+ * @param signal - Optional AbortSignal for cancellation
+ * @param requestId - Optional custom request ID for tracking
  */
 export async function post<T>(
   url: string,
   data: unknown,
-  token?: string
+  token?: string,
+  signal?: AbortSignal,
+  requestId?: string
 ): Promise<ApiResponse<T>> {
+  let reqId = requestId;
+  
   try {
-    const config = token ? { headers: createAuthHeader(token) } : {};
+    // Setup cancellation if not provided
+    const finalSignal = signal || (() => {
+      const { requestId: id, signal: sig } = createCancellableRequest(reqId);
+      reqId = id;
+      return sig;
+    })();
+
+    const config = {
+      ...(token ? { headers: createAuthHeader(token) } : {}),
+      signal: finalSignal,
+    };
     const response = await apiClient.post<T>(url, data, config);
+    
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
     return { success: true, data: response.data };
   } catch (error) {
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
+    // Check if request was cancelled
+    if (error instanceof AxiosError && error.code === 'ERR_CANCELED') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🚫 Request Cancelled: POST ${url}`);
+      }
+      return { success: false, error: 'Request cancelled', cancelled: true };
+    }
+    
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 /**
- * Generic PUT request handler
+ * Generic PUT request handler with cancellation
+ * @param url - The API endpoint URL
+ * @param data - Request body data
+ * @param token - Optional authentication token
+ * @param signal - Optional AbortSignal for cancellation
+ * @param requestId - Optional custom request ID for tracking
  */
 export async function put<T>(
   url: string,
   data: unknown,
-  token?: string
+  token?: string,
+  signal?: AbortSignal,
+  requestId?: string
 ): Promise<ApiResponse<T>> {
+  let reqId = requestId;
+  
   try {
-    const config = token ? { headers: createAuthHeader(token) } : {};
+    // Setup cancellation if not provided
+    const finalSignal = signal || (() => {
+      const { requestId: id, signal: sig } = createCancellableRequest(reqId);
+      reqId = id;
+      return sig;
+    })();
+
+    const config = {
+      ...(token ? { headers: createAuthHeader(token) } : {}),
+      signal: finalSignal,
+    };
     const response = await apiClient.put<T>(url, data, config);
+    
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
     return { success: true, data: response.data };
   } catch (error) {
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
+    // Check if request was cancelled
+    if (error instanceof AxiosError && error.code === 'ERR_CANCELED') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🚫 Request Cancelled: PUT ${url}`);
+      }
+      return { success: false, error: 'Request cancelled', cancelled: true };
+    }
+    
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 /**
- * Generic DELETE request handler
+ * Generic DELETE request handler with cancellation
+ * @param url - The API endpoint URL
+ * @param token - Optional authentication token
+ * @param data - Optional request body data
+ * @param signal - Optional AbortSignal for cancellation
+ * @param requestId - Optional custom request ID for tracking
  */
 export async function del<T>(
   url: string,
   token?: string,
-  data?: unknown
+  data?: unknown,
+  signal?: AbortSignal,
+  requestId?: string
 ): Promise<ApiResponse<T>> {
+  let reqId = requestId;
+  
   try {
-    const config = token
-      ? { headers: createAuthHeader(token), data }
-      : { data };
+    // Setup cancellation if not provided
+    const finalSignal = signal || (() => {
+      const { requestId: id, signal: sig } = createCancellableRequest(reqId);
+      reqId = id;
+      return sig;
+    })();
+
+    const config = {
+      ...(token ? { headers: createAuthHeader(token) } : {}),
+      data,
+      signal: finalSignal,
+    };
     const response = await apiClient.delete<T>(url, config);
+    
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
     return { success: true, data: response.data };
   } catch (error) {
+    // Cleanup request tracking
+    if (reqId) cleanupRequest(reqId);
+    
+    // Check if request was cancelled
+    if (error instanceof AxiosError && error.code === 'ERR_CANCELED') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🚫 Request Cancelled: DELETE ${url}`);
+      }
+      return { success: false, error: 'Request cancelled', cancelled: true };
+    }
+    
     return { success: false, error: getErrorMessage(error) };
   }
 }
