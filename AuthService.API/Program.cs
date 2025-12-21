@@ -78,6 +78,18 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Admin", "Manager", "SuperAdmin"));
 });
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // React dev servers
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Layer registrations
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -92,7 +104,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();  // Added for Swagger UI
 }
 
-app.UseHttpsRedirection();
+// IMPORTANT: UseCors MUST come before UseHttpsRedirection
+app.UseCors("AllowReactApp");
+
+// Conditionally apply HTTPS redirection (not for preflight requests)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Add Security Headers
 app.Use(async (context, next) =>
