@@ -208,11 +208,101 @@ NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:5102/api
 ## Future Enhancements
 
 - [x] ✅ **Automatic token refresh on 401** - Implemented!
-- [ ] Request/response logging in dev mode
+- [x] ✅ **Request/response logging in dev mode** - Implemented!
 - [ ] Request caching for GET requests
 - [ ] Rate limiting handling
 - [ ] Retry logic for failed requests
 - [ ] Request cancellation support
+
+## Request/Response Logging Feature
+
+### Development Mode Only
+
+Logging is automatically enabled in development mode and disabled in production for performance and security.
+
+### What's Logged
+
+**Request Logs (🚀):**
+```typescript
+{
+  method: 'GET',
+  url: '/users',
+  baseURL: 'http://localhost:5102/api',
+  data: { /* request body */ },
+  params: { /* query params */ },
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: '***HIDDEN***' // Tokens are hidden for security
+  }
+}
+```
+
+**Success Response Logs (✅):**
+```typescript
+{
+  method: 'GET',
+  url: '/users',
+  status: 200,
+  statusText: 'OK',
+  data: { /* response data */ },
+  duration: '245ms' // Automatic performance tracking
+}
+```
+
+**Error Response Logs (❌):**
+```typescript
+{
+  method: 'POST',
+  url: '/users',
+  status: 400,
+  statusText: 'Bad Request',
+  message: 'Validation failed',
+  data: { /* error details */ }
+}
+```
+
+### Security Features
+
+✅ **Authorization tokens hidden** - Never logged to console
+✅ **Production disabled** - No logging in production builds
+✅ **Sensitive data protection** - Only logs necessary information
+
+### Performance Tracking
+
+Each request automatically tracks:
+- **Request start time**
+- **Response completion time**
+- **Total duration** (calculated and logged)
+
+### Enable/Disable
+
+Logging is controlled by `NODE_ENV`:
+- **Development**: `NODE_ENV=development` → Logging enabled
+- **Production**: `NODE_ENV=production` → Logging disabled
+
+### Console Output Examples
+
+```bash
+🚀 API Request: { method: 'GET', url: '/users', ... }
+✅ API Response: { status: 200, duration: '234ms', ... }
+
+🚀 API Request: { method: 'POST', url: '/auth/login', ... }
+✅ API Response: { status: 200, duration: '456ms', ... }
+
+🚀 API Request: { method: 'GET', url: '/groups', ... }
+❌ API Error: { status: 401, message: 'Unauthorized', ... }
+🔄 Token Refresh: Attempting automatic refresh...
+✅ Token Refreshed: New token obtained
+✅ API Response: { status: 200, duration: '789ms', ... }
+```
+
+### Benefits
+
+✅ **Easy Debugging**: See all API calls in console
+✅ **Performance Monitoring**: Track request durations
+✅ **Error Tracking**: Quickly identify failed requests
+✅ **Security**: Tokens automatically hidden
+✅ **Zero Config**: Works automatically in dev mode
 
 ## Automatic Token Refresh Feature
 

@@ -39,9 +39,16 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
  */
 async function refreshAccessToken(): Promise<string | null> {
   try {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Token Refresh: Attempting to refresh access token...');
+    }
+
     // Get refresh token (client-side only)
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ Token Refresh: No refresh token found');
+      }
       return null;
     }
 
@@ -54,8 +61,15 @@ async function refreshAccessToken(): Promise<string | null> {
     // Store new tokens
     setTokens(accessToken, newRefreshToken || refreshToken);
 
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Token Refresh: Successfully refreshed access token');
+    }
+
     return accessToken;
   } catch {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Token Refresh: Failed to refresh token, clearing storage');
+    }
     // Clear tokens if refresh fails
     clearTokens();
     return null;
@@ -65,11 +79,33 @@ async function refreshAccessToken(): Promise<string | null> {
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Token will be added per request when needed
-    // This can be enhanced to automatically get from session/cookies
+    // Add request start time for performance tracking
+    if (!config.headers) {
+      config.headers = {} as InternalAxiosRequestConfig['headers'];
+    }
+    config.headers['request-startTime'] = Date.now().toString();
+
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 API Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        baseURL: config.baseURL,
+        data: config.data,
+        params: config.params,
+        headers: {
+          ...config.headers,
+          Authorization: config.headers?.Authorization ? '***HIDDEN***' : undefined,
+          'request-startTime': undefined, // Hide internal timing header
+        },
+      });
+    }
     return config;
   },
   (error: AxiosError) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Request Error:', error.message);
+    }
     return Promise.reject(error);
   }
 );
@@ -77,10 +113,35 @@ apiClient.interceptors.request.use(
 // Response interceptor for global error handling and automatic token refresh
 apiClient.interceptors.response.use(
   (response) => {
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ API Response:', {
+        method: response.config.method?.toUpperCase(),
+        url: response.config.url,
+        status: response.status,
+        statusText: response.statusText,
+        data: response.data,
+        duration: response.config.headers?.['request-startTime']
+          ? `${Date.now() - Number(response.config.headers['request-startTime'])}ms`
+          : 'N/A',
+      });
+    }
     return response;
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Development error logging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ API Error:', {
+        method: originalRequest?.method?.toUpperCase(),
+        url: originalRequest?.url,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message,
+        data: error.response?.data,
+      });
+    }
 
     // If error is 401 and we haven't retried yet, try to refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
