@@ -1,17 +1,16 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useActionState } from 'react';
+import { useActionState, Suspense } from 'react';
 import { resetPasswordAction, ResetPasswordState } from './action';
 import { useEffect } from 'react';
-import AuthLayout from '@/components/auth/AuthLayout';
 import ResetPasswordCard from '@/components/auth/ResetPasswordCard';
 
 const initialState: ResetPasswordState = {
   success: false,
 };
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token') || '';
@@ -26,15 +25,21 @@ export default function ResetPasswordPage() {
   }, [state.success, router]);
 
   return (
-    <AuthLayout>
-      <ResetPasswordCard
-        action={formAction}
-        isPending={isPending}
-        error={state.error}
-        success={state.success}
-        message={state.message}
-        token={token}
-      />
-    </AuthLayout>
+    <ResetPasswordCard
+      action={formAction}
+      isPending={isPending}
+      error={state.error}
+      success={state.success}
+      message={state.message}
+      token={token}
+    />
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

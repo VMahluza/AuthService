@@ -3,7 +3,6 @@
 import { useActionState, useEffect } from 'react';
 import { loginAction, LoginState } from '@/app/auth/login/actions';
 import { useRouter } from 'next/navigation';
-import AuthLayout from '@/components/auth/AuthLayout';
 import SignInCard from '@/components/auth/SignInCard';
 
 const initialState: LoginState = {
@@ -27,8 +26,6 @@ export default function LoginPage() {
   }, [state.success, state.tokens, router]);
 
   return (
-    <AuthLayout>
-      <SignInCard action={formAction} isPending={isPending} error={state.error} />
-    </AuthLayout>
+    <SignInCard action={formAction} isPending={isPending} error={state.error} />
   );
 }
