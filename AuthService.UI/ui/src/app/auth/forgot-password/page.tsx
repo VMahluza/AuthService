@@ -1,37 +1,25 @@
 'use client';
 
+import { forgotPasswordAction, ForgotPasswordState } from './action';
+import Link from 'next/link';
+import { useActionState } from 'react';
+
+const initialState: ForgotPasswordState = {
+  message: '',
+  error: '',
+  success: false,
+  data: undefined
+};
+
 export default function ForgotPasswordPage() {
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      email: formData.get('email'),
-    };
-
-    try {
-      const response = await fetch('http://localhost:5102/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      document.getElementById('response')!.textContent = JSON.stringify(result, null, 2);
-
-      if (response.ok) {
-        alert('Password reset link sent! Please check your email.');
-      }
-    } catch (error: any) {
-      document.getElementById('response')!.textContent = 'Error: ' + error.message;
-    }
-  };
+  const [state, formAction] = useActionState(forgotPasswordAction, initialState);
 
   return (
     <>
       <h2>Forgot Password</h2>
       <p>Enter your email address to receive a password reset link.</p>
       
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <fieldset>
           <legend>Email Address</legend>
           
@@ -43,13 +31,20 @@ export default function ForgotPasswordPage() {
         </fieldset>
       </form>
 
+      {state.success && (
+          <p style={{ color: 'green' }}>{state.message}</p>
+      )}
+      {state.error && (
+          <p style={{ color: 'red' }}>{state.error}</p>
+      )}
+
       <p>
-        Remember your password? <a href="/auth/login">Login here</a>
+        Remember your password? <Link href="/auth/login">Login here</Link>
       </p>
 
       <hr />
       <h3>Response</h3>
-      <pre id="response"></pre>
+      <pre id="response">{JSON.stringify(state, null, 2)}</pre>
     </>
   );
 }
