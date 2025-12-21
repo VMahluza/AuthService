@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import SitemarkIcon from '../landing/SitemarkIcon';
+import NextLink from 'next/link';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -61,7 +62,9 @@ export default function ResetPasswordCard({ action, isPending, error, success, m
   return (
     <Card variant="outlined">
       <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-        <SitemarkIcon />
+        <NextLink href="/">
+          <SitemarkIcon />
+        </NextLink>
       </Box>
       <Typography
         component="h1"
