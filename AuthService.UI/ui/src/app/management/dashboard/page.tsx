@@ -29,14 +29,6 @@ export default function DashboardPage() {
       </section>
       
       <hr />
-      
-      <section>
-        <h3>Current Session</h3>
-        <details>
-          <summary>View Access Token</summary>
-          <pre>{accessToken}</pre>
-        </details>
-      </section>
     </>
   );
 }

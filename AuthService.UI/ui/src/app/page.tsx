@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
    
@@ -5,9 +7,9 @@ export default function Home() {
         <header>
           <h1>AuthService</h1>
           <nav>
-            <a href="/">Home</a> |
-            <a href="/auth/login">Login</a> |
-            <a href="/auth/register">Register</a>
+            <Link href="/">Home</Link> |
+            <Link href="/auth/login">Login</Link> |
+            <Link href="/auth/register">Register</Link>
           </nav>
         </header>
 
@@ -34,8 +36,8 @@ export default function Home() {
           <section>
             <h3>Get Started</h3>
             <p>
-              <a href="/auth/register">Create an account</a> or 
-              <a href="/auth/login">Sign in</a> to access the management dashboard.
+              <Link href="/auth/register">Create an account</Link> or 
+              <Link href="/auth/login">Sign in</Link> to access the management dashboard.
             </p>
           </section>
         </main>
