@@ -1,3 +1,5 @@
+'use client';
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -6,8 +8,19 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import visuallyHidden from '@mui/utils/visuallyHidden';
 import { styled } from '@mui/material/styles';
+
+const visuallyHidden = {
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  padding: 0,
+  margin: -1,
+  border: 0,
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+};
 
 const StyledBox = styled('div')(({ theme }) => ({
   alignSelf: 'center',

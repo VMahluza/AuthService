@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -7,32 +9,59 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 
-import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
-import EdgesensorHighRoundedIcon from '@mui/icons-material/EdgesensorHighRounded';
-import ViewQuiltRoundedIcon from '@mui/icons-material/ViewQuiltRounded';
+import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded';
+import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
 
 const items = [
   {
-    icon: <ViewQuiltRoundedIcon />,
-    title: 'Dashboard',
+    icon: <PersonAddRoundedIcon />,
+    title: 'User Registration and Email Verification',
     description:
-      'This item could provide a snapshot of the most important metrics or data points related to the product.',
+      'Secure user registration process with email verification to ensure account authenticity.',
     imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/dash-light.png")`,
     imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/dash-dark.png")`,
   },
   {
-    icon: <EdgesensorHighRoundedIcon />,
-    title: 'Mobile integration',
+    icon: <LockRoundedIcon />,
+    title: 'Secure Login with JWT Tokens',
     description:
-      'This item could provide information about the mobile app version of the product.',
+      'Robust authentication using JWT tokens for secure and stateless login sessions.',
     imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/mobile-light.png")`,
     imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/mobile-dark.png")`,
   },
   {
-    icon: <DevicesRoundedIcon />,
-    title: 'Available on all platforms',
+    icon: <RestoreRoundedIcon />,
+    title: 'Password Reset and Recovery',
     description:
-      'This item could let users know the product is available on all platforms, such as web, mobile, and desktop.',
+      'Easy password reset and recovery mechanism to help users regain access.',
+    imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/devices-light.png")`,
+    imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/devices-dark.png")`,
+  },
+  {
+    icon: <RefreshRoundedIcon />,
+    title: 'Token Refresh Mechanism',
+    description:
+      'Automatic token refresh to maintain secure sessions without re-authentication.',
+    imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/dash-light.png")`,
+    imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/dash-dark.png")`,
+  },
+  {
+    icon: <ScheduleRoundedIcon />,
+    title: 'Session Management',
+    description:
+      'Comprehensive session management for tracking and controlling user sessions.',
+    imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/mobile-light.png")`,
+    imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/mobile-dark.png")`,
+  },
+  {
+    icon: <SecurityRoundedIcon />,
+    title: 'Role-Based Access Control',
+    description:
+      'Granular access control based on user roles to secure application resources.',
     imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/devices-light.png")`,
     imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/devices-dark.png")`,
   },
@@ -113,7 +142,7 @@ export function MobileLayout({
               ? ({
                   '--items-imageLight': items[selectedItemIndex].imageLight,
                   '--items-imageDark': items[selectedItemIndex].imageDark,
-                } as any)
+                } as React.CSSProperties)
               : {}
           }
         />
@@ -151,15 +180,13 @@ export default function Features() {
           gutterBottom
           sx={{ color: 'text.primary' }}
         >
-          Product features
+          Features
         </Typography>
         <Typography
           variant="body1"
           sx={{ color: 'text.secondary', mb: { xs: 2, sm: 4 } }}
         >
-          Provide a brief overview of the key features of the product. For example,
-          you could list the number of features, their types or benefits, and
-          add-ons.
+          A comprehensive authentication and authorization service with enterprise-grade security features, session management, and role-based access control.
         </Typography>
       </Box>
       <Box
@@ -260,7 +287,7 @@ export default function Features() {
                   ? ({
                       '--items-imageLight': items[selectedItemIndex].imageLight,
                       '--items-imageDark': items[selectedItemIndex].imageDark,
-                    } as any)
+                    } as React.CSSProperties)
                   : {}
               }
             />

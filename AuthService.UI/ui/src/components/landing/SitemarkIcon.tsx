@@ -1,3 +1,4 @@
+'use client';
 import SvgIcon from '@mui/material/SvgIcon';
 
 export default function SitemarkIcon() {
