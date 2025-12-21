@@ -1,58 +1,56 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useActionState } from 'react';
+import { refreshTokenAction, RefreshTokenState } from './action';
+import Link from 'next/link';
+
+const initialState: RefreshTokenState = {
+  message: '',
+  error: '',
+  success: false,
+  data: undefined
+};
 
 export default function RefreshTokenPage() {
-  const [refreshToken, setRefreshToken] = useState('');
+  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refreshToken') || '');
+  const [state, formAction] = useActionState(refreshTokenAction, initialState);
+
+  // Derive the current token from state or local state
+  const currentRefreshToken = (state.success && state.data?.refreshToken) 
+    ? state.data.refreshToken as string 
+    : refreshToken;
 
   useEffect(() => {
-    const token = localStorage.getItem('refreshToken') || '';
-    setRefreshToken(token);
-  }, []);
+    if (state.success && state.data) {
+      const accessToken = state.data.accessToken as string;
+      const newRefreshToken = state.data.refreshToken as string;
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      refreshToken: formData.get('refreshToken'),
-    };
-
-    try {
-      const response = await fetch('http://localhost:5102/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      document.getElementById('response')!.textContent = JSON.stringify(result, null, 2);
-
-      if (response.ok && result.accessToken) {
-        localStorage.setItem('accessToken', result.accessToken);
-        localStorage.setItem('refreshToken', result.refreshToken);
-        alert('Token refreshed successfully!');
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
       }
-    } catch (error: any) {
-      document.getElementById('response')!.textContent = 'Error: ' + error.message;
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
     }
-  };
+  }, [state]);
 
   return (
     <>
       <h2>Refresh Access Token</h2>
       <p>Use your refresh token to get a new access token.</p>
       
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <fieldset>
           <legend>Refresh Token</legend>
           
           <label htmlFor="refreshToken">Refresh Token:</label>
-          <input 
-            type="text" 
-            id="refreshToken" 
-            name="refreshToken" 
-            defaultValue={refreshToken}
-            required 
+          <input
+            type="text"
+            id="refreshToken"
+            name="refreshToken"
+            value={currentRefreshToken}
+            onChange={(e) => setRefreshToken(e.target.value)}
+            required
           />
           <br /><br />
           
@@ -60,13 +58,20 @@ export default function RefreshTokenPage() {
         </fieldset>
       </form>
 
+      {state.success && (
+          <p style={{ color: 'green' }}>{state.message}</p>
+      )}
+      {state.error && (
+          <p style={{ color: 'red' }}>{state.error}</p>
+      )}
+
       <p>
-        <a href="/auth/login">Back to Login</a>
+        <Link href="/auth/login">Back to Login</Link>
       </p>
 
       <hr />
       <h3>Response</h3>
-      <pre id="response"></pre>
+      <pre id="response">{JSON.stringify(state, null, 2)}</pre>
     </>
   );
 }
