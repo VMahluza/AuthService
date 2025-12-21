@@ -1,44 +1,34 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useFormState } from 'react-dom';
+import { resetPasswordAction, ResetPasswordState } from './action';
+import { useEffect } from 'react';
+
+const initialState: ResetPasswordState = {
+  success: false,
+};
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get('token') || '';
+  const [state, formAction] = useFormState(resetPasswordAction, initialState);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      token: formData.get('token'),
-      newPassword: formData.get('newPassword'),
-    };
-
-    try {
-      const response = await fetch('http://localhost:5102/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      document.getElementById('response')!.textContent = JSON.stringify(result, null, 2);
-
-      if (response.ok) {
-        alert('Password reset successful! You can now login with your new password.');
-        window.location.href = '/auth/login';
-      }
-    } catch (error: any) {
-      document.getElementById('response')!.textContent = 'Error: ' + error.message;
+  useEffect(() => {
+    if (state.success) {
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
     }
-  };
+  }, [state.success, router]);
 
   return (
     <>
       <h2>Reset Password</h2>
       <p>Enter your new password below.</p>
       
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <fieldset>
           <legend>New Password</legend>
           
@@ -66,7 +56,9 @@ export default function ResetPasswordPage() {
 
       <hr />
       <h3>Response</h3>
-      <pre id="response"></pre>
+      {state.error && <pre style={{ color: 'red' }}>{state.error}</pre>}
+      {state.success && <pre style={{ color: 'green' }}>{state.message}</pre>}
+      {state.data && <pre>{JSON.stringify(state.data, null, 2)}</pre>}
     </>
   );
 }
