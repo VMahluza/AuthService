@@ -1,72 +1,89 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getRolesAction, createRoleAction } from './actions';
+import styles from '../management.module.css';
+
+interface Role {
+  id: string;
+  name: string;
+  description: string;
+}
 
 export default function RolesPage() {
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadRoles();
-  }, []);
+  const [error, setError] = useState<string>('');
 
   const loadRoles = async () => {
     const token = localStorage.getItem('accessToken');
-    if (!token) return;
+    if (!token) {
+      setError('No access token found');
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:5102/api/roles', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(data);
+      const result = await getRolesAction(token);
+      if (result.success && result.data) {
+        setRoles(result.data);
+        setError('');
+      } else {
+        setError(result.error || 'Failed to load roles');
       }
       setLoading(false);
     } catch (error) {
       console.error('Error loading roles:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
 
   const handleCreateRole = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const token = localStorage.getItem('accessToken');
 
-    const data = {
-      name: formData.get('name'),
-      description: formData.get('description'),
-    };
+    if (!token) {
+      alert('No access token found');
+      return;
+    }
+
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+
+    if (!name) {
+      alert('Role name is required');
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:5102/api/roles', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
+      const result = await createRoleAction(token, name, description);
+      if (result.success) {
         alert('Role created successfully!');
         loadRoles();
         e.currentTarget.reset();
+      } else {
+        alert('Error: ' + (result.error || 'Failed to create role'));
       }
-    } catch (error: any) {
-      alert('Error: ' + error.message);
+    } catch (error) {
+      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error occurred'));
     }
   };
 
   return (
     <>
       <h2>Roles Management</h2>
+      
+      {error && (
+        <div className={styles.errorMessage}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
       
       <section>
         <h3>Create New Role</h3>

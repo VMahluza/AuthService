@@ -1,42 +1,59 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getPermissionsAction } from './actions';
+import styles from '../management.module.css';
+
+interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  resource?: string;
+  action?: string;
+}
 
 export default function PermissionsPage() {
-  const [permissions, setPermissions] = useState<any[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+
+  const loadPermissions = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setError('No access token found');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const result = await getPermissionsAction(token);
+      if (result.success && result.data) {
+        setPermissions(result.data);
+        setError('');
+      } else {
+        setError(result.error || 'Failed to load permissions');
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading permissions:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadPermissions();
   }, []);
 
-  const loadPermissions = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-
-    try {
-      const response = await fetch('http://localhost:5102/api/permissions', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setPermissions(data);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading permissions:', error);
-      setLoading(false);
-    }
-  };
-
   return (
     <>
       <h2>Permissions Management</h2>
+      
+      {error && (
+        <div className={styles.errorMessage}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
       
       <section>
         <h3>System Permissions</h3>

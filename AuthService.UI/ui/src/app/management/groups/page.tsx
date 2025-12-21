@@ -1,72 +1,89 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getGroupsAction, createGroupAction } from './actions';
+import styles from '../management.module.css';
+
+interface Group {
+  id: string;
+  name: string;
+  description: string;
+}
 
 export default function GroupsPage() {
-  const [groups, setGroups] = useState<any[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   const loadGroups = async () => {
     const token = localStorage.getItem('accessToken');
-    if (!token) return;
+    if (!token) {
+      setError('No access token found');
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:5102/api/groups', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setGroups(data);
+      const result = await getGroupsAction(token);
+      if (result.success && result.data) {
+        setGroups(result.data);
+        setError('');
+      } else {
+        setError(result.error || 'Failed to load groups');
       }
       setLoading(false);
     } catch (error) {
       console.error('Error loading groups:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
       setLoading(false);
     }
   };
+
   useEffect(() => {
     loadGroups();
   }, []);
-
 
   const handleCreateGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const token = localStorage.getItem('accessToken');
 
-    const data = {
-      name: formData.get('name'),
-      description: formData.get('description'),
-    };
+    if (!token) {
+      alert('No access token found');
+      return;
+    }
+
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+
+    if (!name) {
+      alert('Group name is required');
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:5102/api/groups', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
+      const result = await createGroupAction(token, name, description);
+      if (result.success) {
         alert('Group created successfully!');
         loadGroups();
         e.currentTarget.reset();
+      } else {
+        alert('Error: ' + (result.error || 'Failed to create group'));
       }
-    } catch (error: any) {
-      alert('Error: ' + error.message);
+    } catch (error) {
+      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error occurred'));
     }
   };
 
   return (
     <>
       <h2>Groups Management</h2>
+      
+      {error && (
+        <div className={styles.errorMessage}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
       
       <section>
         <h3>Create New Group</h3>

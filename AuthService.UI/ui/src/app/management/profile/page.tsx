@@ -1,29 +1,48 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import styles from '../management.module.css';
+
+interface JwtPayload {
+  sub?: string;
+  userId?: string;
+  userName?: string;
+  name?: string;
+  email?: string;
+  role?: string | string[];
+  roles?: string | string[];
+  [key: string]: unknown;
+}
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<JwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+
+  const loadProfile = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setError('No access token found');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Decode JWT to display basic info
+      const payload = JSON.parse(atob(token.split('.')[1])) as JwtPayload;
+      setProfile(payload);
+      setError('');
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      setError(error instanceof Error ? error.message : 'Failed to decode token');
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadProfile();
   }, []);
-
-  const loadProfile = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-
-    try {
-      // Decode JWT to display basic info
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      setProfile(payload);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return <div>Loading profile...</div>;
@@ -32,6 +51,12 @@ export default function ProfilePage() {
   return (
     <>
       <h2>User Profile</h2>
+      
+      {error && (
+        <div className={styles.errorMessage}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
       
       <section>
         <h3>Profile Information</h3>

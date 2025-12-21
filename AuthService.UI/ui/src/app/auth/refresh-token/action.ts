@@ -1,5 +1,6 @@
 'use server'
 
+import axios from 'axios';
 import { BACKEND_BASE_URL } from "@/lib/constants";
 
 export interface RefreshTokenState {
@@ -13,21 +14,20 @@ export async function refreshTokenAction(prevState: RefreshTokenState, formData:
   const refreshToken = formData.get('refreshToken');
 
   try {
-    const response = await fetch(`${BACKEND_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+    const response = await axios.post(`${BACKEND_BASE_URL}/auth/refresh`, {
+      refreshToken
     });
 
-    const text = await response.text();
-    const result = text ? JSON.parse(text) : {};
-
-    if (!response.ok) {
-        return { error: result.detail || result.title || 'Failed to refresh token', success: false };
+    return { 
+      message: 'Token refreshed successfully!', 
+      success: true, 
+      data: response.data 
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.detail || error.response?.data?.title || error.message || 'Failed to refresh token';
+      return { error: errorMessage, success: false };
     }
-
-    return { message: 'Token refreshed successfully!', success: true, data: result };
-  } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'An unexpected error occurred';
     return { error: message, success: false };
   }
