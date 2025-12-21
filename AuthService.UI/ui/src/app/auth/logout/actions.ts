@@ -3,7 +3,7 @@
 import { deleteSession } from '@/lib/session'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { del } from '@/lib/client/api-client'
+import { del } from '@/lib/client'
 
 export async function logoutAction(formData: FormData) {
   const revokeAllSessions = formData.get('revokeAllSessions') === 'on'

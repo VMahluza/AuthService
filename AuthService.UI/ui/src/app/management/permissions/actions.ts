@@ -1,6 +1,6 @@
 ﻿'use server';
 
-import { get, type ApiResponse } from '@/lib/client/api-client';
+import { get, type ApiResponse } from '@/lib/client';
 
 interface Permission {
   id: string;

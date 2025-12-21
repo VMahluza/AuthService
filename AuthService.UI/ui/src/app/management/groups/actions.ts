@@ -1,6 +1,6 @@
 ﻿'use server';
 
-import { get, post, type ApiResponse } from '@/lib/client/api-client';
+import { get, post, type ApiResponse } from '@/lib/client';
 
 interface Group {
   id: string;
