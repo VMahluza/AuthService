@@ -1,7 +1,6 @@
 'use server'
 
-import axios from 'axios';
-import { BACKEND_BASE_URL } from "@/lib/constants";
+import { post } from '@/lib/api-client';
 
 export interface ResetPasswordState {
   error?: string;
@@ -14,23 +13,18 @@ export async function resetPasswordAction(prevState: ResetPasswordState, formDat
   const token = formData.get('token');
   const newPassword = formData.get('newPassword');
 
-  try {
-    const response = await axios.post(`${BACKEND_BASE_URL}/auth/reset-password`, {
-      token,
-      newPassword
-    });
+  const result = await post<Record<string, unknown>>('/auth/reset-password', {
+    token,
+    newPassword
+  });
 
-    return { 
-      message: 'Password reset successful! You can now login with your new password.', 
-      success: true, 
-      data: response.data 
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data?.detail || error.response?.data?.title || error.message || 'Failed to reset password';
-      return { error: errorMessage, success: false };
-    }
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-    return { error: message, success: false };
+  if (!result.success) {
+    return { error: result.error || 'Failed to reset password', success: false };
   }
+
+  return { 
+    message: 'Password reset successful! You can now login with your new password.', 
+    success: true, 
+    data: result.data 
+  };
 }

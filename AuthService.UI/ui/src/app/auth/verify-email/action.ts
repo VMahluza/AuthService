@@ -1,7 +1,6 @@
 'use server'
 
-import axios from 'axios';
-import { BACKEND_BASE_URL } from "@/lib/constants";
+import apiClient, { getErrorMessage } from '@/lib/api-client';
 
 export interface VerifyEmailState {
   error?: string;
@@ -12,7 +11,7 @@ export interface VerifyEmailState {
 
 export async function verifyEmailAction(token: string): Promise<VerifyEmailState> {
   try {
-    const response = await axios.get(`${BACKEND_BASE_URL}/auth/verify-email`, {
+    const response = await apiClient.get('/auth/verify-email', {
       params: { token }
     });
 
@@ -22,11 +21,9 @@ export async function verifyEmailAction(token: string): Promise<VerifyEmailState
       data: response.data 
     };
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data?.detail || error.response?.data?.title || error.message || 'Failed to verify email';
-      return { error: errorMessage, success: false };
-    }
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-    return { error: message, success: false };
+    return { 
+      error: getErrorMessage(error) || 'Failed to verify email', 
+      success: false 
+    };
   }
 }

@@ -1,7 +1,6 @@
 'use server'
 
-import axios from 'axios'
-import { BACKEND_BASE_URL } from '@/lib/constants'
+import { post } from '@/lib/api-client'
 
 export type RegisterState = {
   message?: string
@@ -14,24 +13,15 @@ export async function registerAction(prevState: RegisterState, formData: FormDat
   const email = formData.get('email')
   const password = formData.get('password')
 
-  if (!BACKEND_BASE_URL) {
-    return { error: 'API URL is not configured' }
+  const result = await post('/auth/register', {
+    userName,
+    email,
+    password,
+  })
+
+  if (!result.success) {
+    return { error: result.error || 'Registration failed' }
   }
 
-  try {
-    await axios.post(`${BACKEND_BASE_URL}/auth/register`, {
-      userName,
-      email,
-      password,
-    })
-
-    return { success: true, message: 'Registration successful! Please check your email to verify your account.' }
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data?.detail || error.response?.data?.title || error.message || 'Registration failed'
-      return { error: errorMessage }
-    }
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
-    return { error: errorMessage }
-  }
+  return { success: true, message: 'Registration successful! Please check your email to verify your account.' }
 }
