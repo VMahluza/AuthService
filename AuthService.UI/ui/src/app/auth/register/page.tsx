@@ -1,39 +1,26 @@
 'use client';
 
+import { useActionState } from 'react';
+import { registerAction, RegisterState } from './actions';
+
+const initialState: RegisterState = {
+  message: '',
+  error: '',
+  success: false,
+};
+
 export default function RegisterPage() {
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      userName: formData.get('userName'),
-      email: formData.get('email'),
-      password: formData.get('password'),
-    };
-
-    try {
-      const response = await fetch('http://localhost:5102/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      document.getElementById('response')!.textContent = JSON.stringify(result, null, 2);
-
-      if (response.ok) {
-        alert('Registration successful! Please check your email to verify your account.');
-      }
-    } catch (error: any) {
-      document.getElementById('response')!.textContent = 'Error: ' + error.message;
-    }
-  };
+  const [state, formAction, isPending] = useActionState(registerAction, initialState);
 
   return (
     <>
       <h2>Register New Account</h2>
       
-      <form onSubmit={handleSubmit}>
-        <fieldset>
+      {state.error && <p className="text-red-500 mb-4">{state.error}</p>}
+      {state.success && <p className="text-green-500 mb-4">{state.message}</p>}
+
+      <form action={formAction}>
+        <fieldset disabled={isPending}>
           <legend>Account Information</legend>
           
           <label htmlFor="userName">Username:</label>
@@ -48,17 +35,13 @@ export default function RegisterPage() {
           <input type="password" id="password" name="password" required />
           <br /><br />
           
-          <button type="submit">Register</button>
+          <button type="submit">{isPending ? 'Registering...' : 'Register'}</button>
         </fieldset>
       </form>
 
       <p>
         Already have an account? <a href="/auth/login">Login here</a>
       </p>
-
-      <hr />
-      <h3>Response</h3>
-      <pre id="response"></pre>
     </>
   );
 }

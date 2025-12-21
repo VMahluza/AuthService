@@ -1,33 +1,21 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState } from 'react';
 import { loginAction, LoginState } from '@/app/auth/login/actions';
 
 const initialState: LoginState = {
   message: '',
   error: '',
-  accessToken: '',
-  refreshToken: '',
   success: false,
 };
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, initialState);
 
-  useEffect(() => {
-    if (state.success && state.accessToken) {
-      localStorage.setItem('accessToken', state.accessToken);
-      if (state.refreshToken) {
-        localStorage.setItem('refreshToken', state.refreshToken);
-      }
-      alert('Login successful! Redirecting...');
-      window.location.href = '/management/dashboard';
-    }
-  }, [state]);
-
   return (
     <>
       <h2>Login to Your Account</h2>
+      {state.error && <p className="text-red-500 mb-4">{state.error}</p>}
       
       <form action={formAction}>
         <fieldset disabled={isPending}>

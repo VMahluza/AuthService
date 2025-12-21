@@ -1,28 +1,8 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-
 export default function ManagementLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      alert('Please login to access this page');
-      window.location.href = '/auth/login';
-    } else {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  if (!isAuthenticated) {
-    return <div>Checking authentication...</div>;
-  }
-
   return (
     <>
       <header>

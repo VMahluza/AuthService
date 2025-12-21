@@ -1,29 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 export default function DashboardPage() {
-  const [userName, setUserName] = useState('');
-  const [accessToken, setAccessToken] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      setAccessToken(token);
-      // Decode JWT to get username (simplified)
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUserName(payload.sub || payload.userName || 'User');
-      } catch (e) {
-        setUserName('User');
-      }
-    }
-  }, []);
-
   return (
     <>
       <h2>Dashboard</h2>
-      <p>Welcome, {userName}!</p>
+      <p>Welcome!</p>
       
       <hr />
       
