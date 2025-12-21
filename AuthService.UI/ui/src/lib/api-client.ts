@@ -129,7 +129,10 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { 
+      _retry?: boolean;
+      _retryCount?: number;
+    };
 
     // Development error logging
     if (process.env.NODE_ENV === 'development') {
@@ -141,6 +144,58 @@ apiClient.interceptors.response.use(
         message: error.message,
         data: error.response?.data,
       });
+    }
+
+    // Rate Limiting Handling (429 Too Many Requests)
+    if (error.response?.status === 429) {
+      const retryCount = originalRequest._retryCount || 0;
+      const maxRetries = 3;
+
+      if (retryCount < maxRetries) {
+        // Get retry delay from Retry-After header or use exponential backoff
+        const retryAfter = error.response.headers['retry-after'];
+        let delay: number;
+
+        if (retryAfter) {
+          // Retry-After can be in seconds or a date
+          const retryAfterNum = parseInt(retryAfter);
+          if (!isNaN(retryAfterNum)) {
+            delay = retryAfterNum * 1000; // Convert seconds to milliseconds
+          } else {
+            // Try parsing as date
+            const retryDate = new Date(retryAfter);
+            delay = retryDate.getTime() - Date.now();
+          }
+        } else {
+          // Exponential backoff: 1s, 2s, 4s
+          delay = Math.pow(2, retryCount) * 1000;
+        }
+
+        // Cap delay at 30 seconds
+        delay = Math.min(delay, 30000);
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`⏳ Rate Limit: Waiting ${delay}ms before retry (attempt ${retryCount + 1}/${maxRetries})`);
+        }
+
+        // Wait before retrying
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        // Increment retry count
+        originalRequest._retryCount = retryCount + 1;
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔄 Rate Limit: Retrying request to ${originalRequest.url}`);
+        }
+
+        // Retry the request
+        return apiClient(originalRequest);
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Rate Limit: Max retries reached, giving up');
+        }
+        return Promise.reject(error);
+      }
     }
 
     // If error is 401 and we haven't retried yet, try to refresh token
@@ -289,7 +344,6 @@ export function clearCache(key?: string): void {
  * Get cache statistics
  */
 export function getCacheStats() {
-  const now = Date.now();
   const entries = Array.from(cache.entries());
   const valid = entries.filter(([, entry]) => isCacheValid(entry));
   const expired = entries.length - valid.length;

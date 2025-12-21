@@ -210,7 +210,7 @@ NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:5102/api
 - [x] ✅ **Automatic token refresh on 401** - Implemented!
 - [x] ✅ **Request/response logging in dev mode** - Implemented!
 - [x] ✅ **Request caching for GET requests** - Implemented!
-- [ ] Rate limiting handling
+- [x] ✅ **Rate limiting handling** - Implemented!
 - [ ] Retry logic for failed requests
 - [ ] Request cancellation support
 
@@ -378,6 +378,228 @@ export async function createUser(token: string, data: UserInput) {
 - **Cache Miss**: Normal API latency
 - **Memory**: Minimal (~1KB per entry)
 - **Cleanup**: Automatic on expiration
+
+## Rate Limiting Handling Feature
+
+### Overview
+
+Automatic detection and handling of 429 (Too Many Requests) responses with intelligent retry logic.
+
+### How It Works
+
+1. **429 Detection**: Response interceptor catches rate limit errors
+2. **Retry-After Header**: Reads server's suggested retry delay
+3. **Exponential Backoff**: Falls back to 1s, 2s, 4s delays if no header
+4. **Automatic Retry**: Waits and retries up to 3 times
+5. **Max Delay Cap**: Limits retry delay to 30 seconds maximum
+
+### Key Features
+
+✅ **Retry-After Header Support**: Respects server's retry timing  
+✅ **Exponential Backoff**: Smart fallback strategy  
+✅ **Configurable Max Retries**: Default 3 attempts  
+✅ **Delay Capping**: Maximum 30-second wait  
+✅ **Development Logging**: Full visibility during development  
+✅ **Automatic Handling**: Works for all API calls
+
+### Retry Strategy
+
+**With Retry-After Header:**
+```
+Attempt 1: 429 → Wait [Retry-After] → Retry
+Attempt 2: 429 → Wait [Retry-After] → Retry
+Attempt 3: 429 → Wait [Retry-After] → Retry
+Attempt 4: 429 → Give up, return error
+```
+
+**Without Retry-After Header (Exponential Backoff):**
+```
+Attempt 1: 429 → Wait 1s → Retry
+Attempt 2: 429 → Wait 2s → Retry
+Attempt 3: 429 → Wait 4s → Retry
+Attempt 4: 429 → Give up, return error
+```
+
+### Development Logging
+
+Console output when rate limited:
+
+```bash
+❌ API Error: { status: 429, message: 'Too Many Requests', ... }
+⏳ Rate Limit: Waiting 5000ms before retry (attempt 1/3)
+🔄 Rate Limit: Retrying request to /users
+
+❌ API Error: { status: 429, message: 'Too Many Requests', ... }
+⏳ Rate Limit: Waiting 2000ms before retry (attempt 2/3)
+🔄 Rate Limit: Retrying request to /users
+
+✅ API Response: { status: 200, data: [...], duration: '234ms' }
+```
+
+### Configuration
+
+**Default Settings:**
+- Max Retries: 3
+- Exponential Backoff: 2^n seconds (1s, 2s, 4s)
+- Max Delay: 30 seconds
+- Retry-After Priority: Yes (server value always used if present)
+
+### Retry-After Header Formats
+
+**Seconds Format:**
+```
+Retry-After: 60
+→ Wait 60 seconds
+```
+
+**HTTP Date Format:**
+```
+Retry-After: Wed, 21 Dec 2025 12:00:00 GMT
+→ Wait until specified time
+```
+
+### Use Cases
+
+**API Rate Limits:**
+```typescript
+// Automatically handled - no code changes needed
+const result = await get<User[]>('/users', token);
+
+// If rate limited:
+// - Waits appropriate delay
+// - Retries automatically
+// - Returns data or error after max retries
+```
+
+**Burst Protection:**
+```typescript
+// Making many requests rapidly
+const promises = users.map(user => 
+  post('/users', user, token)
+);
+
+// If any hit rate limit:
+// - Each request retries independently
+// - Delays spread out load
+// - Reduces server burden
+```
+
+### Error Handling
+
+**Max Retries Reached:**
+```typescript
+try {
+  const result = await get<User[]>('/users', token);
+  if (!result.success) {
+    // Handle error after all retries exhausted
+    console.error(result.error); // "Too Many Requests"
+  }
+} catch (error) {
+  // Network or other errors
+}
+```
+
+**User Feedback:**
+```typescript
+export async function getUsers(token: string) {
+  const result = await get<User[]>('/users', token);
+  
+  if (!result.success && result.error?.includes('Too Many Requests')) {
+    return {
+      success: false,
+      error: 'Server is busy. Please try again in a moment.'
+    };
+  }
+  
+  return result;
+}
+```
+
+### Benefits
+
+✅ **Automatic Recovery**: No manual intervention needed  
+✅ **Server-Friendly**: Respects Retry-After headers  
+✅ **Smart Backoff**: Exponential delays reduce load  
+✅ **User Transparent**: Happens in background  
+✅ **Production-Ready**: Works without logging overhead  
+✅ **Configurable**: Easy to adjust retry count/delays
+
+### Best Practices
+
+1. ✅ **Trust the Feature**: Let it handle rate limits automatically
+2. ✅ **Show Loading States**: UI should indicate progress during retries
+3. ✅ **Provide Feedback**: Inform users if max retries reached
+4. ✅ **Monitor in Dev**: Watch console logs to optimize request patterns
+5. ✅ **Batch Wisely**: Group requests to avoid hitting limits
+6. ❌ **Don't Implement Custom Retry**: Use the built-in feature
+7. ❌ **Don't Ignore Errors**: Handle max retry failures gracefully
+
+### Advanced Customization
+
+To customize retry behavior, modify the interceptor:
+
+```typescript
+// In api-client.ts
+const maxRetries = 3;          // Increase/decrease retry count
+const maxDelay = 30000;        // Adjust max delay (milliseconds)
+const backoffBase = 2;         // Change exponential base (2^n)
+
+// Example: More aggressive retries
+const maxRetries = 5;
+const backoffBase = 1.5;       // Slower exponential growth
+```
+
+### Performance Impact
+
+- **Best Case**: Request succeeds immediately (no overhead)
+- **Rate Limited**: 1-30 second delays per retry
+- **Max Retries**: Up to ~37 seconds total (1s + 2s + 4s + delays)
+- **Memory**: Negligible (request queuing only)
+
+### Integration Example
+
+```typescript
+// actions/users.ts
+export async function getUsers(token: string) {
+  // Rate limiting handled automatically!
+  return get<User[]>('/users', token);
+}
+
+// Component
+const handleLoadUsers = async () => {
+  setLoading(true);
+  
+  // May take longer if rate limited, but will retry automatically
+  const result = await getUsers(token);
+  
+  if (result.success) {
+    setUsers(result.data);
+  } else {
+    // Only shown if all retries fail
+    setError('Unable to load users. Please try again later.');
+  }
+  
+  setLoading(false);
+};
+```
+
+### Monitoring Rate Limits
+
+**Development Mode:**
+```bash
+# Watch for rate limit patterns
+⏳ Rate Limit: Waiting 5000ms before retry (attempt 1/3)
+⏳ Rate Limit: Waiting 5000ms before retry (attempt 1/3)
+⏳ Rate Limit: Waiting 5000ms before retry (attempt 1/3)
+
+# Many simultaneous rate limits = need to optimize request pattern
+```
+
+**Production Monitoring:**
+- Track 429 responses in error logs
+- Monitor retry success rates
+- Alert on repeated max-retry failures
+- Optimize batch sizes if rate limits frequent
 
 ## Request/Response Logging Feature
 
