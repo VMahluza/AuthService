@@ -18,7 +18,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "MarketingPage Template - Material UI",
+  title: "Auth Service Core",
   description: "Authentication Service",
 };
 
