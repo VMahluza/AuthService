@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
   return (
    
-      <body>
+  <>
         <header>
           <h1>AuthService</h1>
           <nav>
@@ -46,8 +46,7 @@ export default function Home() {
           <hr />
           <p>&copy; 2025 AuthService. All rights reserved.</p>
         </footer>
-      </body>
- 
+    </>
        
   );
 }
