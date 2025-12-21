@@ -209,10 +209,175 @@ NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:5102/api
 
 - [x] ✅ **Automatic token refresh on 401** - Implemented!
 - [x] ✅ **Request/response logging in dev mode** - Implemented!
-- [ ] Request caching for GET requests
+- [x] ✅ **Request caching for GET requests** - Implemented!
 - [ ] Rate limiting handling
 - [ ] Retry logic for failed requests
 - [ ] Request cancellation support
+
+## Request Caching Feature
+
+### Overview
+
+Automatic caching for GET requests to reduce unnecessary API calls and improve performance.
+
+### How It Works
+
+1. **Cache Check**: Before making a GET request, checks if cached data exists
+2. **Cache Hit**: Returns cached data immediately if valid
+3. **Cache Miss**: Makes API call and stores response in cache
+4. **Auto Expiration**: Cached entries expire after TTL (default: 5 minutes)
+5. **Smart Keys**: Separate cache for authenticated vs public requests
+
+### Basic Usage
+
+```typescript
+// Default caching (5 minutes TTL)
+const result = await get<User[]>('/users', token);
+
+// Disable caching for specific request
+const result = await get<User[]>('/users', token, false);
+
+// Custom cache TTL (10 minutes)
+const result = await get<User[]>('/users', token, true, 10 * 60 * 1000);
+```
+
+### Cache Management
+
+```typescript
+import { clearCache, getCacheStats } from '@/lib/api-client';
+
+// Clear specific cache entry
+clearCache('/users_authenticated');
+
+// Clear all cache
+clearCache();
+
+// Get cache statistics
+const stats = getCacheStats();
+console.log(stats); // { total: 5, valid: 4, expired: 1, size: 5 }
+```
+
+### Configuration
+
+**Default Settings:**
+- TTL: 5 minutes (300,000ms)
+- Enabled: Yes (can be disabled per request)
+- Storage: In-memory Map
+
+**Custom TTL Examples:**
+```typescript
+const ONE_MINUTE = 60 * 1000;
+const FIVE_MINUTES = 5 * 60 * 1000;
+const TEN_MINUTES = 10 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+
+// Short-lived cache (1 minute)
+await get<User[]>('/users', token, true, ONE_MINUTE);
+
+// Long-lived cache (1 hour)
+await get<Config>('/config', token, true, ONE_HOUR);
+```
+
+### Cache Key Strategy
+
+Cache keys are generated from:
+- URL path
+- Authentication status (public vs authenticated)
+
+**Examples:**
+- `/users_authenticated` - Authenticated request
+- `/config_public` - Public request
+
+### Development Logging
+
+Console output in development mode:
+
+```bash
+💾 Cache Set: /users_authenticated (TTL: 300000ms)
+💾 Cache Hit: /users_authenticated
+🗑️ Cache Expired: /users_authenticated
+🗑️ Cache Cleared: /users_authenticated
+🗑️ Cache Cleared: All entries
+```
+
+### Use Cases
+
+**Frequently Accessed Data:**
+```typescript
+// Permissions - rarely change
+await get<Permission[]>('/permissions', token, true, 10 * 60 * 1000);
+
+// User profile - updates occasionally
+await get<Profile>('/profile', token, true, 5 * 60 * 1000);
+```
+
+**Real-time Data:**
+```typescript
+// Notifications - always fresh
+await get<Notification[]>('/notifications', token, false);
+
+// Activity feed - no caching
+await get<Activity[]>('/activity', token, false);
+```
+
+**Mixed Strategy:**
+```typescript
+// Initial load - use cache
+const result = await get<User[]>('/users', token);
+
+// After mutation - clear cache
+await post('/users', userData, token);
+clearCache('/users_authenticated');
+
+// Next request gets fresh data
+const updated = await get<User[]>('/users', token);
+```
+
+### Benefits
+
+✅ **Reduced API Calls**: Avoid redundant requests
+✅ **Improved Performance**: Instant responses from cache
+✅ **Lower Server Load**: Fewer backend requests
+✅ **Better UX**: Faster page loads and navigation
+✅ **Automatic Expiration**: Stale data prevented
+✅ **Smart Invalidation**: Clear cache after mutations
+
+### Best Practices
+
+1. ✅ **Use caching for stable data** (roles, permissions, config)
+2. ✅ **Disable for real-time data** (notifications, messages)
+3. ✅ **Clear cache after mutations** (create, update, delete)
+4. ✅ **Adjust TTL based on data volatility**
+5. ✅ **Monitor cache hit rates** in development
+6. ❌ **Don't cache sensitive data** with long TTLs
+7. ❌ **Don't rely on cache for critical operations**
+
+### Cache Invalidation Pattern
+
+```typescript
+// actions/users.ts
+export async function getUsers(token: string) {
+  return get<User[]>('/users', token); // Uses cache
+}
+
+export async function createUser(token: string, data: UserInput) {
+  const result = await post<User>('/users', data, token);
+  
+  if (result.success) {
+    // Clear cache so next getUsers() fetches fresh data
+    clearCache('/users_authenticated');
+  }
+  
+  return result;
+}
+```
+
+### Performance Impact
+
+- **Cache Hit**: ~0-1ms (instant)
+- **Cache Miss**: Normal API latency
+- **Memory**: Minimal (~1KB per entry)
+- **Cleanup**: Automatic on expiration
 
 ## Request/Response Logging Feature
 

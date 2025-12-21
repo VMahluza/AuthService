@@ -202,6 +202,107 @@ apiClient.interceptors.response.use(
 );
 
 /**
+ * Cache management for GET requests
+ */
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  expiresAt: number;
+}
+
+const cache = new Map<string, CacheEntry<unknown>>();
+const DEFAULT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+/**
+ * Generate cache key from URL and token
+ */
+function generateCacheKey(url: string, token?: string): string {
+  return `${url}_${token ? 'authenticated' : 'public'}`;
+}
+
+/**
+ * Check if cache entry is still valid
+ */
+function isCacheValid<T>(entry: CacheEntry<T>): boolean {
+  return Date.now() < entry.expiresAt;
+}
+
+/**
+ * Get data from cache
+ */
+function getFromCache<T>(key: string): T | null {
+  const entry = cache.get(key) as CacheEntry<T> | undefined;
+  
+  if (!entry) {
+    return null;
+  }
+
+  if (isCacheValid(entry)) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('💾 Cache Hit:', key);
+    }
+    return entry.data;
+  }
+
+  // Remove expired entry
+  cache.delete(key);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🗑️ Cache Expired:', key);
+  }
+  return null;
+}
+
+/**
+ * Store data in cache
+ */
+function setCache<T>(key: string, data: T, ttl: number = DEFAULT_CACHE_TTL): void {
+  const entry: CacheEntry<T> = {
+    data,
+    timestamp: Date.now(),
+    expiresAt: Date.now() + ttl,
+  };
+  cache.set(key, entry);
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('💾 Cache Set:', key, `(TTL: ${ttl}ms)`);
+  }
+}
+
+/**
+ * Clear cache for specific key or all cache
+ */
+export function clearCache(key?: string): void {
+  if (key) {
+    cache.delete(key);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🗑️ Cache Cleared:', key);
+    }
+  } else {
+    cache.clear();
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🗑️ Cache Cleared: All entries');
+    }
+  }
+}
+
+/**
+ * Get cache statistics
+ */
+export function getCacheStats() {
+  const now = Date.now();
+  const entries = Array.from(cache.entries());
+  const valid = entries.filter(([, entry]) => isCacheValid(entry));
+  const expired = entries.length - valid.length;
+
+  return {
+    total: entries.length,
+    valid: valid.length,
+    expired,
+    size: cache.size,
+  };
+}
+
+/**
  * Generic API response type
  */
 export interface ApiResponse<T> {
@@ -236,15 +337,39 @@ export function createAuthHeader(token: string) {
 }
 
 /**
- * Generic GET request handler
+ * Generic GET request handler with caching
+ * @param url - The API endpoint URL
+ * @param token - Optional authentication token
+ * @param useCache - Whether to use cache (default: true)
+ * @param cacheTTL - Cache time-to-live in milliseconds (default: 5 minutes)
  */
 export async function get<T>(
   url: string,
-  token?: string
+  token?: string,
+  useCache: boolean = true,
+  cacheTTL?: number
 ): Promise<ApiResponse<T>> {
   try {
+    // Check cache first if enabled
+    if (useCache) {
+      const cacheKey = generateCacheKey(url, token);
+      const cachedData = getFromCache<T>(cacheKey);
+      
+      if (cachedData !== null) {
+        return { success: true, data: cachedData };
+      }
+    }
+
+    // Make actual request
     const config = token ? { headers: createAuthHeader(token) } : {};
     const response = await apiClient.get<T>(url, config);
+    
+    // Store in cache if enabled
+    if (useCache) {
+      const cacheKey = generateCacheKey(url, token);
+      setCache(cacheKey, response.data, cacheTTL);
+    }
+    
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
