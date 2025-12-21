@@ -1,9 +1,10 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { BACKEND_BASE_URL } from './constants';
+import { getRefreshToken, setTokens, clearTokens } from './token-utils';
 
 /**
  * Centralized API client using axios
- * Implements DRY and SOLID principles
+ * Implements DRY and SOLID principles with automatic token refresh
  */
 
 // Create axios instance with default configuration
@@ -38,12 +39,8 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
  */
 async function refreshAccessToken(): Promise<string | null> {
   try {
-    // Get refresh token from localStorage (client-side only)
-    if (typeof window === 'undefined') {
-      return null;
-    }
-
-    const refreshToken = localStorage.getItem('refreshToken');
+    // Get refresh token (client-side only)
+    const refreshToken = getRefreshToken();
     if (!refreshToken) {
       return null;
     }
@@ -55,18 +52,12 @@ async function refreshAccessToken(): Promise<string | null> {
     const { accessToken, refreshToken: newRefreshToken } = response.data;
 
     // Store new tokens
-    localStorage.setItem('accessToken', accessToken);
-    if (newRefreshToken) {
-      localStorage.setItem('refreshToken', newRefreshToken);
-    }
+    setTokens(accessToken, newRefreshToken || refreshToken);
 
     return accessToken;
-  } catch (error) {
+  } catch {
     // Clear tokens if refresh fails
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-    }
+    clearTokens();
     return null;
   }
 }

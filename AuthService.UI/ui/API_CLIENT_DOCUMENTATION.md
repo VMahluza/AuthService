@@ -207,12 +207,60 @@ NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:5102/api
 
 ## Future Enhancements
 
-- [ ] Automatic token refresh on 401
+- [x] ✅ **Automatic token refresh on 401** - Implemented!
 - [ ] Request/response logging in dev mode
 - [ ] Request caching for GET requests
 - [ ] Rate limiting handling
 - [ ] Retry logic for failed requests
 - [ ] Request cancellation support
+
+## Automatic Token Refresh Feature
+
+### How It Works
+
+1. **401 Detection**: When any API call returns a 401 (Unauthorized), the interceptor catches it
+2. **Token Refresh**: Automatically calls the `/auth/refresh` endpoint with the refresh token
+3. **Request Queue**: While refreshing, all incoming requests are queued
+4. **Retry Original**: Once new token is obtained, retries the original request automatically
+5. **Fallback**: If refresh fails, redirects to login page and clears tokens
+
+### Implementation Details
+
+```typescript
+// Automatic retry on 401
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 && !request._retry) {
+      // Queue concurrent requests
+      // Refresh access token
+      // Retry original request with new token
+      // Or redirect to login if refresh fails
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+### Token Storage
+
+**Server-Side (SSR):**
+- Access token stored in HTTP-only cookie (`session`)
+- Refresh token stored in HTTP-only cookie (`refreshToken`)
+- Managed by `src/lib/session.ts`
+
+**Client-Side:**
+- Tokens stored in `localStorage` for API calls
+- Managed by `src/lib/token-utils.ts`
+- Automatically synced with cookies
+
+### Benefits
+
+✅ **Seamless UX**: Users never see authentication errors during normal token expiration
+✅ **Security**: Tokens auto-refresh before user notices expiration
+✅ **Request Queuing**: Multiple concurrent 401s only trigger one refresh
+✅ **Fallback Handling**: Auto-logout on refresh failure
+✅ **No Code Changes**: Existing API calls automatically benefit
 
 ## Maintainability Score
 

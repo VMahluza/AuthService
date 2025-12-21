@@ -1,6 +1,15 @@
+'use client';
+
 import { logoutAction } from './actions';
+import { useEffect } from 'react';
+import { clearTokens } from '@/lib/token-utils';
 
 export default function LogoutPage() {
+  // Clear client-side tokens on mount
+  useEffect(() => {
+    clearTokens();
+  }, []);
+
   return (
     <>
       <h2>Logout</h2>

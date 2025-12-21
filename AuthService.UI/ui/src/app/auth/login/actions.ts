@@ -2,12 +2,15 @@
 
 import { post } from '@/lib/api-client';
 import { createSession } from '@/lib/session';
-import { redirect } from 'next/navigation';
 
 export type LoginState = {
   message?: string;
   error?: string;
   success?: boolean;
+  tokens?: {
+    accessToken: string;
+    refreshToken: string;
+  };
 };
 
 interface LoginResponse {
@@ -25,9 +28,19 @@ export async function loginAction(prevState: LoginState, formData: FormData): Pr
   });
 
   if (!result.success || !result.data) {
-    return { error: result.error || 'Login failed' };
+    return { error: result.error || 'Login failed', success: false };
   }
 
+  // Store in server-side cookies
   await createSession(result.data.accessToken, result.data.refreshToken);
-  redirect('/management/dashboard');
+  
+  // Return tokens for client-side storage
+  return { 
+    success: true, 
+    message: 'Login successful!',
+    tokens: {
+      accessToken: result.data.accessToken,
+      refreshToken: result.data.refreshToken,
+    }
+  };
 }

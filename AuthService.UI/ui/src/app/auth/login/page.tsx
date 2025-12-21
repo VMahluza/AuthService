@@ -1,7 +1,8 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { loginAction, LoginState } from '@/app/auth/login/actions';
+import { useRouter } from 'next/navigation';
 
 const initialState: LoginState = {
   message: '',
@@ -11,6 +12,17 @@ const initialState: LoginState = {
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, initialState);
+  const router = useRouter();
+
+  // Sync tokens to localStorage on successful login
+  useEffect(() => {
+    if (state.success && state.tokens) {
+      localStorage.setItem('accessToken', state.tokens.accessToken);
+      localStorage.setItem('refreshToken', state.tokens.refreshToken);
+      // Redirect after storing tokens
+      router.push('/management/dashboard');
+    }
+  }, [state.success, state.tokens, router]);
 
   return (
     <>
