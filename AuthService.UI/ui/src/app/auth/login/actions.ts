@@ -1,6 +1,6 @@
 'use server';
 
-import { post } from '@/lib/api-client';
+import { post } from '@/lib/client/api-client';
 import { createSession } from '@/lib/session';
 
 export type LoginState = {

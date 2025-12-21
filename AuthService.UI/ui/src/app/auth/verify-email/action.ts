@@ -1,6 +1,6 @@
 'use server'
 
-import apiClient, { getErrorMessage } from '@/lib/api-client';
+import apiClient, { getErrorMessage } from '@/lib/client/api-client';
 
 export interface VerifyEmailState {
   error?: string;

@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { BACKEND_BASE_URL } from './constants';
-import { getRefreshToken, setTokens, clearTokens } from './token-utils';
+import { BACKEND_BASE_URL } from '../constants';
+import { getRefreshToken, setTokens, clearTokens } from '../token-utils';
 
 /**
  * Centralized API client using axios

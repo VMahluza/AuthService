@@ -1,6 +1,6 @@
 'use server'
 
-import { post } from '@/lib/api-client';
+import { post } from '@/lib/client/api-client';
 
 export interface ForgotPasswordState {
   error?: string;
