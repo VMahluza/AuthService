@@ -1,18 +1,22 @@
-import type { Metadata } from "next";
+import type {} from '@mui/x-date-pickers/themeAugmentation';
+import type {} from '@mui/x-charts/themeAugmentation';
+import type {} from '@mui/x-data-grid-pro/themeAugmentation';
+import type {} from '@mui/x-tree-view/themeAugmentation';
 import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import AppNavbar from '../../components/management/AppNavbar';
-import Header from '../../components/management/Header';
-import SideMenu from '../../components/management/SideMenu';
-import AppTheme from '../../components/management/theme/AppTheme';
+import AppNavbar from './AppNavbar';
+import Header from './Header';
+import MainGrid from './MainGrid';
+import SideMenu from './SideMenu';
+import AppTheme from './theme/AppTheme';
 import {
   chartsCustomizations,
   dataGridCustomizations,
   datePickersCustomizations,
   treeViewCustomizations,
-} from '../../components/management/theme/customizations';
+} from './theme/customizations';
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -21,18 +25,9 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-export const metadata: Metadata = {
-  title: "AuthService - Management",
-  description: "Management Portal",
-};
-
-export default function ManagementLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Dashboard(props: { disableCustomTheme?: boolean }) {
   return (
-    <AppTheme themeComponents={xThemeComponents}>
+    <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu />
@@ -58,7 +53,7 @@ export default function ManagementLayout({
             }}
           >
             <Header />
-            {children}
+            <MainGrid />
           </Stack>
         </Box>
       </Box>

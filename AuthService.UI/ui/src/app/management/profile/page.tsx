@@ -1,7 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from '../management.module.css';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid2';
+import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
 
 interface JwtPayload {
   sub?: string;
@@ -45,55 +54,94 @@ export default function ProfilePage() {
   }, []);
 
   if (loading) {
-    return <div>Loading profile...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
-    <>
-      <h2>User Profile</h2>
-      
+    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        User Profile
+      </Typography>
+
       {error && (
-        <div className={styles.errorMessage}>
-          <strong>Error:</strong> {error}
-        </div>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
       )}
-      
-      <section>
-        <h3>Profile Information</h3>
-        {profile ? (
-          <dl>
-            <dt>User ID:</dt>
-            <dd>{profile.sub || profile.userId || 'N/A'}</dd>
-            
-            <dt>Username:</dt>
-            <dd>{profile.userName || profile.name || 'N/A'}</dd>
-            
-            <dt>Email:</dt>
-            <dd>{profile.email || 'N/A'}</dd>
-            
-            <dt>Roles:</dt>
-            <dd>{profile.role || profile.roles || 'N/A'}</dd>
-          </dl>
-        ) : (
-          <p>No profile information available</p>
-        )}
-      </section>
-      
-      <hr />
-      
-      <section>
-        <h3>Token Details</h3>
-        <details>
-          <summary>View Full Token Payload</summary>
-          <pre>{JSON.stringify(profile, null, 2)}</pre>
-        </details>
-      </section>
-      
-      <hr />
-      
-      <p>
-        <a href="/management/dashboard">Back to Dashboard</a>
-      </p>
-    </>
+
+      {profile ? (
+        <Card>
+          <CardContent>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Avatar
+                  sx={{ width: 100, height: 100, mb: 2, bgcolor: 'primary.main', fontSize: '3rem' }}
+                >
+                  {profile.name ? profile.name.charAt(0).toUpperCase() : (profile.userName ? profile.userName.charAt(0).toUpperCase() : 'U')}
+                </Avatar>
+                <Typography variant="h5">{profile.name || profile.userName || 'Unknown User'}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {profile.email || 'No Email'}
+                </Typography>
+              </Grid>
+              
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Typography variant="h6" gutterBottom>
+                  Details
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      User ID
+                    </Typography>
+                    <Typography variant="body1">
+                      {profile.sub || profile.userId || 'N/A'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Username
+                    </Typography>
+                    <Typography variant="body1">
+                      {profile.userName || profile.name || 'N/A'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Roles
+                    </Typography>
+                    <Typography variant="body1">
+                      {Array.isArray(profile.role) 
+                        ? profile.role.join(', ') 
+                        : (profile.role || Array.isArray(profile.roles) ? (profile.roles as string[]).join(', ') : (profile.roles as string) || 'None')}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Box sx={{ mt: 4 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Token Details
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Box component="pre" sx={{ p: 2, bgcolor: 'grey.100', borderRadius: 1, overflow: 'auto', maxHeight: 300 }}>
+                    {JSON.stringify(profile, null, 2)}
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      ) : (
+        <Alert severity="info">No profile information available</Alert>
+      )}
+    </Box>
   );
 }
