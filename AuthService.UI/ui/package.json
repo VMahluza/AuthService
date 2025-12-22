@@ -17,6 +17,8 @@
     "@mui/x-charts": "^8.22.1",
     "@mui/x-data-grid": "^8.22.1",
     "@mui/x-date-pickers": "^8.22.1",
+    "@mui/x-tree-view": "^8.22.0",
+    "@react-spring/web": "^10.0.3",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "next": "16.1.0",

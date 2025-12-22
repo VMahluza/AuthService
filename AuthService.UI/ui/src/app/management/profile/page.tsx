@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
