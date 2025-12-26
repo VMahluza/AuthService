@@ -1,10 +1,11 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { verifyEmailAction } from './action';
+import VerifyEmailCard from '@/components/auth/VerifyEmailCard';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -38,17 +39,14 @@ export default function VerifyEmailPage() {
   }, [token, router]);
 
   return (
-    <>
-      <h2>Email Verification</h2>
-      <p>Please wait while we verify your email address...</p>
-      
-      <hr />
-      <h3>Verification Status</h3>
-      <pre style={{ color: isSuccess ? 'green' : 'inherit' }}>{response}</pre>
+    <VerifyEmailCard message={response} isSuccess={isSuccess} />
+  );
+}
 
-      <p>
-        <a href="/auth/login">Go to Login</a>
-      </p>
-    </>
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

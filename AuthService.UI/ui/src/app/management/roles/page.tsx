@@ -2,7 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { getRolesAction, createRoleAction } from './actions';
-import styles from '../management.module.css';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 interface Role {
   id: string;
@@ -49,7 +64,7 @@ export default function RolesPage() {
     const token = localStorage.getItem('accessToken');
 
     if (!token) {
-      alert('No access token found');
+      setError('No access token found');
       return;
     }
 
@@ -57,88 +72,106 @@ export default function RolesPage() {
     const description = formData.get('description') as string;
 
     if (!name) {
-      alert('Role name is required');
+      setError('Role name is required');
       return;
     }
 
     try {
       const result = await createRoleAction(token, name, description);
       if (result.success) {
-        alert('Role created successfully!');
         loadRoles();
         e.currentTarget.reset();
       } else {
-        alert('Error: ' + (result.error || 'Failed to create role'));
+        setError(result.error || 'Failed to create role');
       }
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error occurred'));
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
     }
   };
 
   return (
-    <>
-      <h2>Roles Management</h2>
-      
+    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Roles Management
+      </Typography>
+
       {error && (
-        <div className={styles.errorMessage}>
-          <strong>Error:</strong> {error}
-        </div>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
       )}
-      
-      <section>
-        <h3>Create New Role</h3>
-        <form onSubmit={handleCreateRole}>
-          <fieldset>
-            <legend>Role Information</legend>
-            
-            <label htmlFor="name">Role Name:</label>
-            <input type="text" id="name" name="name" required />
-            <br /><br />
-            
-            <label htmlFor="description">Description:</label>
-            <textarea id="description" name="description" rows={3}></textarea>
-            <br /><br />
-            
-            <button type="submit">Create Role</button>
-          </fieldset>
-        </form>
-      </section>
-      
-      <hr />
-      
-      <section>
-        <h3>Existing Roles</h3>
-        {loading ? (
-          <p>Loading roles...</p>
-        ) : roles.length > 0 ? (
-          <table border={1}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
-                  <td>{role.id}</td>
-                  <td>{role.name}</td>
-                  <td>{role.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No roles found. Create your first role above.</p>
-        )}
-      </section>
-      
-      <hr />
-      
-      <p>
-        <a href="/management/dashboard">Back to Dashboard</a>
-      </p>
-    </>
+
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Card>
+            <CardContent>
+              <Typography component="h3" variant="h6" gutterBottom>
+                Create New Role
+              </Typography>
+              <Box component="form" onSubmit={handleCreateRole} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Role Name"
+                  name="name"
+                  required
+                  fullWidth
+                  variant="outlined"
+                />
+                <TextField
+                  label="Description"
+                  name="description"
+                  multiline
+                  rows={3}
+                  fullWidth
+                  variant="outlined"
+                />
+                <Button type="submit" variant="contained" color="primary">
+                  Create Role
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Card>
+            <CardContent>
+              <Typography component="h3" variant="h6" gutterBottom>
+                Existing Roles
+              </Typography>
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : roles.length > 0 ? (
+                <TableContainer component={Paper} elevation={0} variant="outlined">
+                  <Table aria-label="roles table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Description</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {roles.map((role) => (
+                        <TableRow key={role.id}>
+                          <TableCell>{role.id}</TableCell>
+                          <TableCell>{role.name}</TableCell>
+                          <TableCell>{role.description}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography variant="body1" color="text.secondary">
+                  No roles found. Create your first role.
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

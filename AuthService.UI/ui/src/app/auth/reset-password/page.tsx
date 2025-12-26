@@ -1,19 +1,20 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useFormState } from 'react-dom';
+import { useActionState, Suspense } from 'react';
 import { resetPasswordAction, ResetPasswordState } from './action';
 import { useEffect } from 'react';
+import ResetPasswordCard from '@/components/auth/ResetPasswordCard';
 
 const initialState: ResetPasswordState = {
   success: false,
 };
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token') || '';
-  const [state, formAction] = useFormState(resetPasswordAction, initialState);
+  const [state, formAction, isPending] = useActionState(resetPasswordAction, initialState);
 
   useEffect(() => {
     if (state.success) {
@@ -24,41 +25,21 @@ export default function ResetPasswordPage() {
   }, [state.success, router]);
 
   return (
-    <>
-      <h2>Reset Password</h2>
-      <p>Enter your new password below.</p>
-      
-      <form action={formAction}>
-        <fieldset>
-          <legend>New Password</legend>
-          
-          <label htmlFor="token">Reset Token:</label>
-          <input 
-            type="text" 
-            id="token" 
-            name="token" 
-            defaultValue={token}
-            required 
-          />
-          <br /><br />
-          
-          <label htmlFor="newPassword">New Password:</label>
-          <input type="password" id="newPassword" name="newPassword" required />
-          <br /><br />
-          
-          <button type="submit">Reset Password</button>
-        </fieldset>
-      </form>
+    <ResetPasswordCard
+      action={formAction}
+      isPending={isPending}
+      error={state.error}
+      success={state.success}
+      message={state.message}
+      token={token}
+    />
+  );
+}
 
-      <p>
-        <a href="/auth/login">Back to Login</a>
-      </p>
-
-      <hr />
-      <h3>Response</h3>
-      {state.error && <pre style={{ color: 'red' }}>{state.error}</pre>}
-      {state.success && <pre style={{ color: 'green' }}>{state.message}</pre>}
-      {state.data && <pre>{JSON.stringify(state.data, null, 2)}</pre>}
-    </>
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
