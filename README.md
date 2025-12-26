@@ -22,7 +22,7 @@ A comprehensive, Domain-Driven Design (DDD) based Authentication and Identity Ma
 ### Backend
 *   **.NET 10**: The latest version of the .NET platform.
 *   **ASP.NET Core Web API**: For building high-performance RESTful APIs.
-*   **Entity Framework Core**: ORM for database interactions.
+*   **Dapper**: ORM for database interactions.
 *   **MySQL**: Relational database for data persistence.
 *   **MediatR**: For implementing the Mediator pattern and CQRS.
 *   **FluentValidation**: For strong validation rules.
