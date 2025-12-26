@@ -120,7 +120,7 @@ export default function SignInCard({ action, isPending, error }: SignInCardProps
             id="userName"
             type="text"
             name="userName"
-            placeholder="your@email.com"
+            placeholder="Enter your username"
             autoComplete="username"
             autoFocus
             required
@@ -146,7 +146,7 @@ export default function SignInCard({ action, isPending, error }: SignInCardProps
             error={passwordError}
             helperText={passwordErrorMessage}
             name="password"
-            placeholder=""
+            placeholder="Enter your password"
             type="password"
             id="password"
             autoComplete="current-password"
