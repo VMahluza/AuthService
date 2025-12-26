@@ -23,12 +23,12 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
         <LogoCollection />
         <Features />
         <Divider />
-        <Testimonials />
-        <Divider />
+        {/* <Testimonials /> */}
+        {/* <Divider /> */}
         <Highlights />
         <Divider />
-        <Pricing />
-        <Divider />
+        {/* <Pricing /> */}
+        {/* <Divider /> */}
         <FAQ />
         <Divider />
         <Footer />

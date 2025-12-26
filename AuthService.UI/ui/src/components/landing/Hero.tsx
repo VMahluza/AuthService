@@ -132,7 +132,7 @@ export default function Hero() {
               fontWeight: 700,
             }}
           >
-            Secure, Scalable&nbsp;
+            Auth as-
             <Typography
               component="span"
               variant="h1"
@@ -145,7 +145,7 @@ export default function Hero() {
                 }),
               })}
             >
-              Authentication Service
+              a Service
             </Typography>
           </Typography>
 
