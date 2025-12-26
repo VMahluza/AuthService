@@ -20,7 +20,7 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
       <AppAppBar />
       <Hero />
       <div>
-        <LogoCollection />
+        {/* <LogoCollection /> */}
         <Features />
         <Divider />
         {/* <Testimonials /> */}
