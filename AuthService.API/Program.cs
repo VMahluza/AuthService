@@ -1,89 +1,25 @@
-using MySqlConnector;
 using AuthService.Infrastructure;
-using AuthService.Application;  // Add this for AddApplication
+using AuthService.Infrastructure.Authentication;
+using AuthService.Application;
 using AuthService.API.Middleware;
-using AuthService.Domain.Constants;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();  // Added for Swagger UI
+builder.Services.AddSwaggerGen();
 
-// Configure JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["Secret"];
-
-// Validate JWT secret key minimum length (32 characters for HS256)
-if (string.IsNullOrEmpty(secretKey) || secretKey.Length < 32)
-{
-    throw new InvalidOperationException(
-        "JWT Secret key must be at least 32 characters long. " +
-        "Please set a secure key via environment variable or user secrets.");
-}
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ClockSkew = TimeSpan.FromMinutes(5), // Reduce clock skew tolerance
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-    };
-});
-
-// Configure Authorization Policies
-builder.Services.AddAuthorization(options =>
-{
-    // Single role policies
-    options.AddPolicy(AuthorizationPolicies.RequireAdminRole, policy =>
-        policy.RequireRole("Admin"));
-    
-    options.AddPolicy(AuthorizationPolicies.RequireSuperAdminRole, policy =>
-        policy.RequireRole("SuperAdmin"));
-    
-    options.AddPolicy(AuthorizationPolicies.RequireManagerRole, policy =>
-        policy.RequireRole("Manager"));
-    
-    options.AddPolicy(AuthorizationPolicies.RequireUserRole, policy =>
-        policy.RequireAuthenticatedUser());
-
-    // Permission-based policies (for future use with claims)
-    options.AddPolicy(AuthorizationPolicies.CanManageRoles, policy =>
-        policy.RequireRole("Admin", "SuperAdmin"));
-    
-    options.AddPolicy(AuthorizationPolicies.CanManageGroups, policy =>
-        policy.RequireRole("Admin", "SuperAdmin"));
-    
-    options.AddPolicy(AuthorizationPolicies.CanManageUsers, policy =>
-        policy.RequireRole("Admin", "Manager", "SuperAdmin"));
-    
-    options.AddPolicy(AuthorizationPolicies.CanViewAuditLogs, policy =>
-        policy.RequireRole("Admin", "Manager", "SuperAdmin"));
-});
+// Configure Authentication & Authorization (from Infrastructure)
+builder.Services.AddAuthenticationServices(builder.Configuration);
 
 // Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // React dev servers
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -100,14 +36,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwagger();  // Added for Swagger JSON
-    app.UseSwaggerUI();  // Added for Swagger UI
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-// IMPORTANT: UseCors MUST come before UseHttpsRedirection
 app.UseCors("AllowReactApp");
 
-// Conditionally apply HTTPS redirection (not for preflight requests)
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
@@ -130,9 +64,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Add Authentication & Authorization middleware
 app.UseAuthentication();
-app.UseMiddleware<JwtRevocationMiddleware>(); // Validate tokens against session database
+app.UseMiddleware<JwtRevocationMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
