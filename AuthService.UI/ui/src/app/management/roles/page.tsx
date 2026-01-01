@@ -7,9 +7,8 @@ import Alert from "@mui/material/Alert";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import CreateRoleCard from "@/components/management/roles/CreateRoleCard";
 
 export default async function RolesPage() {
   const res = await getRolesAction();
@@ -28,7 +27,9 @@ export default async function RolesPage() {
           </Alert>
         )}
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 4 }}>H</Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <CreateRoleCard />
+          </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
             <Card>
               <CardContent>
